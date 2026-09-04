@@ -1,29 +1,27 @@
-# EXERCISE m3.1 — StockMovement Resource, Observer & Policy
+# EXERCISE m3.2 — Dashboard Widget Dasar
 
 ## Tujuan Pembelajaran
-- Mencatat pergerakan stok dan meng-update `current_stock` otomatis.
-- Menegakkan otorisasi khusus di level Policy/Model (bukan hanya UI).
+- Membuat dashboard analytics dengan widget Filament native (Chart.js).
+- Memusatkan logika agregasi di `InventoryAnalyticsService`.
 
 ## Kondisi Codebase Saat Ini
-- Product/Category/Supplier + RBAC Shield sudah ada.
-- Belum ada pencatatan pergerakan stok.
+- Master data + stock movement + RBAC lengkap.
+- Dashboard masih default (Account + Filament info).
 
 ## Yang Perlu Dibangun
-1. Enum `StockMovementType` (`in`, `out`, `adjustment`).
-2. Migration `stock_movements`: `product_id` FK, `type`, `qty`, `note`
-   (nullable), `user_id` FK (causer), timestamps.
-3. Model `StockMovement` (belongsTo Product & User).
-4. `StockMovementObserver` — recalc `current_stock` produk otomatis
-   (in: +qty, out: -qty, adjustment: set = qty).
-5. `StockMovementPolicy`: hanya `manager`/`admin` boleh membuat movement
-   bertipe `adjustment`, ditegakkan di **level Policy + Observer** (berlaku
-   walau lewat Model langsung, bukan cuma UI). Rujuk guideline security Spatie:
-   aksi destruktif method HTTP benar + automated test otorisasi.
-6. `StockMovementResource` (form + table).
-7. Regenerate permission Shield agar role staff/manager punya izin
-   StockMovement.
+1. `app/Services/InventoryAnalyticsService.php` dengan method publik:
+   - `stockByCategory()` — total stok per kategori.
+   - `inventoryValueByCategory()` — nilai inventory (stok × harga modal) per
+     kategori.
+   - KPI: total produk, total unit stok, jumlah produk stok kritis, total nilai
+     inventory.
+   (Widget HANYA memanggil service, JANGAN query agregasi di dalam widget.)
+2. `StatsOverviewWidget` — 4 KPI.
+3. `ChartWidget` bar: stok per kategori.
+4. `ChartWidget` doughnut: nilai inventory per kategori — `canView()` hanya
+   manager/admin (melibatkan harga modal).
 
 ## Acceptance Criteria
-- Test: staff TIDAK bisa membuat `adjustment` (via UI maupun langsung ke Model).
-- Test: `current_stock` ter-update benar untuk in/out/adjustment.
-- Manual walkthrough input movement.
+- Test `canView()` benar (doughnut tersembunyi untuk staff).
+- Test data agregat benar.
+- Manual walkthrough dashboard per role.
