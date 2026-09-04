@@ -1,6 +1,10 @@
 <?php
 
+use App\Models\User;
+use Database\Seeders\RoleSeeder;
+use Database\Seeders\ShieldSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 /*
@@ -44,7 +48,40 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * Pastikan permission Shield + 3 role sudah ada (idempotent, sekali per test).
+ */
+function ensureRolesSeeded(): void
 {
-    // ..
+    if (Permission::query()->count() === 0) {
+        test()->seed(ShieldSeeder::class);
+        test()->seed(RoleSeeder::class);
+    }
+}
+
+/**
+ * Buat user dengan role yang benar-benar punya permission Shield (TANPA login).
+ */
+function userWithRole(string $role): User
+{
+    ensureRolesSeeded();
+
+    $user = User::factory()->create();
+    $user->assignRole($role);
+
+    return $user;
+}
+
+/**
+ * User super admin (role `admin`) — melewati semua policy via Gate::before.
+ * Dikembalikan tanpa login; pakai `$this->actingAs(...)` di test.
+ */
+function adminUser(): User
+{
+    ensureRolesSeeded();
+
+    $user = User::factory()->create();
+    $user->assignRole('admin');
+
+    return $user;
 }

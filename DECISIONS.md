@@ -71,6 +71,32 @@ Dibuat lewat `UserSeeder` (idempotent `updateOrCreate` by email), BUKAN
 | `manager@demo.com` | Manager Inventory | manager |
 | `admin@demo.com` | Administrator | admin |
 
+## Filament Shield / RBAC (m2.2)
+
+- **`shield:setup` versi lama TIDAK dipakai.** Filament Shield v4 memakai
+  `shield:install {panel}` + `shield:generate`. Keduanya **berjalan mulus dengan
+  `--no-interaction`** — tidak macet, jadi tidak butuh pipe/`yes`.
+  - `php artisan shield:install admin --no-interaction` → mendaftarkan
+    `FilamentShieldPlugin` ke `AdminPanelProvider` otomatis.
+  - `php artisan shield:generate --all --panel=admin --no-interaction` →
+    membuat 4 Policy (Category/Product/Supplier/Role) + 48 permission.
+- **Format permission Shield v4: `Action:Resource`** (mis. `ViewAny:Product`,
+  `Delete:Product`, `ForceDelete:Product`).
+- **Super admin = role `admin`** (config `super_admin.name` diubah dari
+  `super_admin` → `admin`, `intercept_gate = before`). `panel_user` dimatikan
+  agar role tepat 3: `staff`, `manager`, `admin`.
+- **Seeding self-contained.** `migrate:fresh` mengosongkan tabel permission,
+  jadi permission di-regenerate saat seeding lewat `ShieldSeeder`
+  (`Artisan::call('shield:generate', ['--option' => 'permissions'])` — mode
+  `permissions` tidak menulis ulang file policy, cepat, dan otomatis mengikuti
+  resource baru seperti StockMovement di m3.1). `RoleSeeder` lalu memberi subset
+  permission per role & assign ke akun demo.
+- **Jenjang permission:** admin=48 (semua), manager=30 (kelola penuh domain
+  Product/Category/Supplier KECUALI ForceDelete* & Role), staff=8 (Product
+  view/create/update + Category/Supplier read-only, TANPA delete).
+- **Dampak ke test lama:** setelah policy aktif, test resource m1.1/m1.2 memakai
+  helper `adminUser()` (super admin) di `tests/Pest.php`.
+
 ## Command Interaktif (ditangani)
 
 - `laravel new` **tidak dipakai** (interaktif) — memakai

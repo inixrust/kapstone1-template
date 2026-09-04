@@ -6,12 +6,11 @@ use App\Filament\Resources\Suppliers\Pages\ListSuppliers;
 use App\Filament\Resources\Suppliers\RelationManagers\ProductsRelationManager;
 use App\Models\Product;
 use App\Models\Supplier;
-use App\Models\User;
 
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
-    $this->actingAs(User::factory()->create());
+    $this->actingAs(adminUser());
 });
 
 it('lists suppliers on the index page', function () {
