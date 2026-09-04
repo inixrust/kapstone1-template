@@ -27,6 +27,11 @@ class ProductForm
                     ->searchable()
                     ->preload()
                     ->required(),
+                Select::make('supplier_id')
+                    ->label('Supplier')
+                    ->relationship('supplier', 'name')
+                    ->searchable()
+                    ->preload(),
                 TextInput::make('harga_jual')
                     ->label('Harga Jual')
                     ->prefix('Rp')

@@ -21,6 +21,7 @@ class Product extends Model
         'sku',
         'name',
         'category_id',
+        'supplier_id',
         'harga_jual',
         'harga_modal',
         'reorder_point',
@@ -42,6 +43,12 @@ class Product extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /** @return BelongsTo<Supplier, $this> */
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
     }
 
     /** @return HasMany<StockMovement, $this> */

@@ -28,6 +28,11 @@ class ProductsTable
                     ->badge()
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('supplier.name')
+                    ->label('Supplier')
+                    ->searchable()
+                    ->toggleable()
+                    ->placeholder('—'),
                 TextColumn::make('harga_jual')
                     ->label('Harga Jual')
                     ->money('IDR')
