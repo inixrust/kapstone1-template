@@ -2,8 +2,11 @@
 
 namespace App\Services;
 
+use App\Enums\StockMovementType;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\StockMovement;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 
 /**
@@ -48,6 +51,41 @@ class InventoryAnalyticsService
             ->mapWithKeys(fn ($row): array => [
                 $row->category_name => (float) $row->value,
             ]);
+    }
+
+    /**
+     * Tren total qty masuk (in) vs keluar (out) per hari untuk N hari terakhir.
+     * Hari tanpa movement diisi 0 sehingga sumbu waktu selalu lengkap.
+     *
+     * @return array{labels: list<string>, in: list<int>, out: list<int>}
+     */
+    public function movementTrend(int $days = 30): array
+    {
+        $start = CarbonImmutable::today()->subDays($days - 1);
+
+        $rows = StockMovement::query()
+            ->selectRaw('DATE(created_at) as day')
+            ->selectRaw('SUM(CASE WHEN type = ? THEN qty ELSE 0 END) as total_in', [StockMovementType::In->value])
+            ->selectRaw('SUM(CASE WHEN type = ? THEN qty ELSE 0 END) as total_out', [StockMovementType::Out->value])
+            ->where('created_at', '>=', $start->startOfDay())
+            ->groupBy('day')
+            ->get()
+            ->keyBy('day');
+
+        $labels = [];
+        $in = [];
+        $out = [];
+
+        for ($i = 0; $i < $days; $i++) {
+            $date = $start->addDays($i);
+            $key = $date->format('Y-m-d');
+
+            $labels[] = $date->format('d M');
+            $in[] = (int) ($rows[$key]->total_in ?? 0);
+            $out[] = (int) ($rows[$key]->total_out ?? 0);
+        }
+
+        return ['labels' => $labels, 'in' => $in, 'out' => $out];
     }
 
     public function totalProducts(): int
