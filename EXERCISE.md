@@ -1,14 +1,17 @@
-# EXERCISE m4.3 — Dashboard: Tren Stok Masuk vs Keluar (Live)
+# EXERCISE m4.4 — Dashboard: Stok Kritis & Dead Stock
 
 ## Tujuan Pembelajaran
-- Membuat line chart dengan 2 dataset dan polling (live update).
+- Membuat chart dengan warna kondisional dan query analitik (dead stock).
 
 ## Yang Perlu Dibangun
-1. `InventoryAnalyticsService::movementTrend(int $days = 30)` — total qty
-   masuk (in) vs keluar (out) per hari untuk N hari terakhir (isi 0 untuk hari
-   tanpa movement).
-2. `ChartWidget` line dengan 2 dataset (Masuk & Keluar), `$pollingInterval = '15s'`.
+1. `InventoryAnalyticsService::criticalStockProducts()` — produk dengan stok
+   kritis/menipis (stok ≤ 1.5× reorder point), diurutkan.
+2. `InventoryAnalyticsService::deadStockProducts(int $days = 60)` — produk tanpa
+   pergerakan stok selama N hari terakhir.
+3. `ChartWidget` bar stok kritis (warna kondisional merah = kritis / kuning =
+   menipis).
+4. `ChartWidget` bar dead stock.
 
 ## Acceptance Criteria
-- Test: data agregat per hari benar.
-- Manual walkthrough: chart live update tanpa reload.
+- Test: query stok kritis & dead stock benar (dengan data uji spesifik).
+- Manual walkthrough kedua chart.
