@@ -1,23 +1,21 @@
-# EXERCISE m1.1 — Resource Product & Category
+# EXERCISE m1.2 — Resource Supplier & Relasi
 
 ## Tujuan Pembelajaran
-- Membuat migration, model, relasi, dan Filament Resource untuk master data.
-- Memakai Form Builder & Table Builder Filament.
+- Membuat relasi antar-entitas dan RelationManager Filament.
 
 ## Kondisi Codebase Saat Ini
-- Panel Filament ber-brand aktif.
-- Belum ada model/tabel domain (Product, Category).
+- Sudah ada Product & Category beserta resource-nya.
+- Belum ada entitas Supplier.
 
 ## Yang Perlu Dibangun
-1. Migration `categories`: `name`, timestamps.
-2. Migration `products`: `sku` (unique), `name`, `category_id` (FK),
-   `harga_jual`, `harga_modal`, `reorder_point`, `unit`,
-   `current_stock` (default 0), timestamps.
-3. Model `Category` (hasMany Product) & `Product` (belongsTo Category) dengan
-   `$fillable`/`$casts` yang benar.
-4. Factory untuk keduanya.
-5. `CategoryResource` & `ProductResource` (form + table schema).
+1. Migration `suppliers`: `name`, `email` (nullable), `phone` (nullable),
+   `address` (nullable), timestamps.
+2. Migration menambah `supplier_id` (nullable FK) ke `products`.
+3. Model `Supplier` (hasMany Product) & update `Product` (belongsTo Supplier).
+4. `SupplierResource` (form + table).
+5. `ProductsRelationManager` di `SupplierResource` — menampilkan produk milik
+   supplier tersebut.
 
 ## Acceptance Criteria
-- Pest feature test CRUD Category & Product lulus.
-- Manual walkthrough CRUD di `/admin` berhasil.
+- Pest feature test CRUD Supplier lulus.
+- RelationManager menampilkan produk supplier dengan benar (teruji).
