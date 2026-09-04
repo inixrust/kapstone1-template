@@ -109,6 +109,40 @@ class InventoryAnalyticsService
     }
 
     /**
+     * Produk dengan stok kritis/menipis (current_stock <= 1.5 × reorder_point),
+     * diurutkan dari yang paling genting. Dipakai chart stok kritis.
+     *
+     * @return Collection<int, Product>
+     */
+    public function criticalStockProducts(int $limit = 15): Collection
+    {
+        return Product::query()
+            ->whereRaw('current_stock <= reorder_point * 1.5')
+            ->orderByRaw('CAST(current_stock AS SIGNED) - CAST(reorder_point AS SIGNED)')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Produk tanpa pergerakan stok selama N hari terakhir (dead stock),
+     * termasuk produk yang belum pernah punya movement sama sekali.
+     *
+     * @return Collection<int, Product>
+     */
+    public function deadStockProducts(int $days = 60, int $limit = 15): Collection
+    {
+        $cutoff = CarbonImmutable::today()->subDays($days);
+
+        return Product::query()
+            ->whereDoesntHave('stockMovements', function ($query) use ($cutoff): void {
+                $query->where('created_at', '>=', $cutoff);
+            })
+            ->orderBy('name')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
      * Total nilai seluruh inventory berdasarkan harga modal.
      */
     public function totalInventoryValue(): float
