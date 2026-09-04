@@ -1,17 +1,15 @@
-# EXERCISE m5.1 — Hardening
+# EXERCISE m5.2 — Testing Lengkap dengan Pest
 
 ## Tujuan Pembelajaran
-- Mengeraskan aplikasi terhadap mass assignment & bypass otorisasi.
-- Memverifikasi proteksi bawaan (rate limit login, CSRF).
+- Membuktikan otorisasi lewat automated test yang menyeluruh (pemenuhan
+  langsung guideline security Spatie).
 
-## Yang Perlu Dibangun / Diverifikasi
-1. `$fillable`/`$guarded` benar di semua Model — khususnya `current_stock`
-   TIDAK boleh di-mass-assign (hanya lewat StockMovementObserver).
-2. Test bypass Policy lewat manipulasi request langsung ke Model (staff tetap
-   ditolak untuk adjustment & delete).
-3. Verifikasi rate limiting login bawaan Filament aktif; dokumentasikan di
-   README. JANGAN nonaktifkan CSRF di form mana pun (default Laravel).
+## Yang Perlu Dibangun
+1. Authorization matrix test: staff/manager/admin × semua Resource
+   (Product, Category, Supplier, StockMovement, Role) untuk ability
+   view/create/update/delete/forceDelete.
+2. Pastikan test masking, audit trail, dan seluruh widget dashboard sudah
+   tercakup (dari modul sebelumnya).
 
 ## Acceptance Criteria
-- Test: bypass UI tetap ditolak Policy/Model.
-- Rate limit login terverifikasi.
+- `php artisan test` hijau (seluruh suite).
