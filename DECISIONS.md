@@ -97,6 +97,22 @@ Dibuat lewat `UserSeeder` (idempotent `updateOrCreate` by email), BUKAN
 - **Dampak ke test lama:** setelah policy aktif, test resource m1.1/m1.2 memakai
   helper `adminUser()` (super admin) di `tests/Pest.php`.
 
+## Hardening & Security (m5.1)
+
+- **Mass assignment:** semua model memakai `$fillable` eksplisit.
+  `Product.current_stock` sengaja di luar `$fillable` → hanya berubah lewat
+  `StockMovementObserver`. Terbukti lewat test (`fill`/`update` mengabaikan
+  `current_stock`).
+- **Otorisasi ditegakkan di level Model, bukan hanya UI:** adjustment stok
+  diblokir untuk staff via Observer + Policy; staff tidak bisa delete produk
+  (Policy). Diuji lewat manipulasi langsung ke Model.
+- **Rate limiting login:** bawaan Filament aktif (`$this->rateLimit(5)` di
+  halaman Login) — percobaan gagal ke-6 kena throttle. Diverifikasi test.
+- **CSRF:** tidak dinonaktifkan di form mana pun (middleware
+  `PreventRequestForgery` tetap aktif di panel). Sesuai guideline security
+  Spatie: aksi destruktif lewat Livewire ditegakkan Policy, password di-hash
+  (cast `hashed`), tidak ada nilai sensitif plaintext.
+
 ## Command Interaktif (ditangani)
 
 - `laravel new` **tidak dipakai** (interaktif) — memakai
