@@ -88,6 +88,68 @@ class InventoryAnalyticsService
         return ['labels' => $labels, 'in' => $in, 'out' => $out];
     }
 
+    /**
+     * Produk paling banyak keluar (fast-moving) dalam N hari terakhir.
+     *
+     * @return Collection<string, int> [nama produk => total qty keluar]
+     */
+    public function topMovingProducts(int $days = 30, int $limit = 10): Collection
+    {
+        $cutoff = CarbonImmutable::today()->subDays($days - 1)->startOfDay();
+
+        return StockMovement::query()
+            ->selectRaw('products.name as product_name')
+            ->selectRaw('SUM(stock_movements.qty) as total_out')
+            ->join('products', 'products.id', '=', 'stock_movements.product_id')
+            ->where('stock_movements.type', StockMovementType::Out->value)
+            ->where('stock_movements.created_at', '>=', $cutoff)
+            ->groupBy('products.name')
+            ->orderByDesc('total_out')
+            ->limit($limit)
+            ->get()
+            ->mapWithKeys(fn ($row): array => [
+                $row->product_name => (int) $row->total_out,
+            ]);
+    }
+
+    /**
+     * Analisis ABC (Pareto) berbasis nilai inventory (stok × harga modal).
+     * Kelas: A (kumulatif ≤ 80%), B (≤ 95%), C (sisanya).
+     *
+     * @return Collection<int, array{name: string, value: float, cumulative_percentage: float, class: string}>
+     */
+    public function abcAnalysis(): Collection
+    {
+        $products = Product::query()
+            ->selectRaw('name')
+            ->selectRaw('current_stock * harga_modal as value')
+            ->orderByRaw('current_stock * harga_modal DESC')
+            ->get();
+
+        $total = (float) $products->sum('value');
+
+        $cumulative = 0.0;
+
+        return $products->map(function ($row) use (&$cumulative, $total): array {
+            $value = (float) $row->value;
+            $cumulative += $value;
+            $cumulativePercentage = $total > 0 ? round(($cumulative / $total) * 100, 2) : 0.0;
+
+            $class = match (true) {
+                $cumulativePercentage <= 80.0 => 'A',
+                $cumulativePercentage <= 95.0 => 'B',
+                default => 'C',
+            };
+
+            return [
+                'name' => $row->name,
+                'value' => $value,
+                'cumulative_percentage' => $cumulativePercentage,
+                'class' => $class,
+            ];
+        });
+    }
+
     public function totalProducts(): int
     {
         return Product::query()->count();
