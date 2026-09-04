@@ -9,6 +9,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class ProductsTable
 {
@@ -37,10 +38,13 @@ class ProductsTable
                     ->label('Harga Jual')
                     ->money('IDR')
                     ->sortable(),
+                // Harga modal = data sensitif. Kolom TIDAK dirender untuk staff
+                // (hidden total, bukan ****).
                 TextColumn::make('harga_modal')
                     ->label('Harga Modal')
                     ->money('IDR')
-                    ->sortable(),
+                    ->sortable()
+                    ->visible(fn (): bool => Auth::user()?->can('viewCost', Product::class) ?? false),
                 TextColumn::make('current_stock')
                     ->label('Stok')
                     ->badge()

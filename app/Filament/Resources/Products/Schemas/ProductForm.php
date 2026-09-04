@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
+use App\Models\Product;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Auth;
 
 class ProductForm
 {
@@ -39,13 +41,16 @@ class ProductForm
                     ->numeric()
                     ->minValue(0)
                     ->default(0),
+                // Harga modal = data sensitif. Hidden TOTAL untuk staff
+                // (field tidak dirender sama sekali), bukan disamarkan ****.
                 TextInput::make('harga_modal')
                     ->label('Harga Modal')
                     ->prefix('Rp')
                     ->required()
                     ->numeric()
                     ->minValue(0)
-                    ->default(0),
+                    ->default(0)
+                    ->visible(fn (): bool => Auth::user()?->can('viewCost', Product::class) ?? false),
                 TextInput::make('reorder_point')
                     ->label('Reorder Point')
                     ->helperText('Batas stok minimum sebelum dianggap kritis.')

@@ -27,6 +27,15 @@ class ProductPolicy
         return $authUser->can('Create:Product');
     }
 
+    /**
+     * Harga modal = data sensitif. Hanya manager/admin yang boleh melihat.
+     * Dipakai untuk masking field/kolom harga_modal (hidden total, bukan ****).
+     */
+    public function viewCost(AuthUser $authUser): bool
+    {
+        return $authUser->hasAnyRole(['manager', 'admin']);
+    }
+
     public function update(AuthUser $authUser, Product $product): bool
     {
         return $authUser->can('Update:Product');
