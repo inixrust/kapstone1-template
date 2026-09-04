@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Spatie\Activitylog\Models\Activity;
 
 class Product extends Model
 {
@@ -55,6 +57,24 @@ class Product extends Model
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class);
+    }
+
+    /**
+     * Activity log dari seluruh pergerakan stok produk ini (untuk tab audit).
+     *
+     * @return HasManyThrough<Activity, StockMovement, $this>
+     */
+    public function stockActivities(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Activity::class,
+            StockMovement::class,
+            'product_id',   // FK di stock_movements → products.id
+            'subject_id',   // FK di activity_log → stock_movements.id
+            'id',           // local key di products
+            'id',           // local key di stock_movements
+        )->where('activity_log.subject_type', StockMovement::class)
+            ->latest('activity_log.created_at');
     }
 
     /**

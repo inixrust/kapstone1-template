@@ -9,12 +9,35 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 #[ObservedBy(StockMovementObserver::class)]
 class StockMovement extends Model
 {
     /** @use HasFactory<StockMovementFactory> */
-    use HasFactory;
+    use HasFactory, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('stock_movement')
+            ->logOnly(['product_id', 'type', 'qty', 'note', 'user_id'])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
+
+    /**
+     * Deskripsi audit; penyesuaian (adjustment) diberi deskripsi khusus.
+     */
+    public function getDescriptionForEvent(string $eventName): string
+    {
+        if ($this->type === StockMovementType::Adjustment) {
+            return "Penyesuaian stok (adjustment) {$eventName} — qty akhir {$this->qty}";
+        }
+
+        return "Pergerakan stok {$this->type->value} {$eventName} — qty {$this->qty}";
+    }
 
     protected $fillable = [
         'product_id',
