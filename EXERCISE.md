@@ -1,24 +1,23 @@
-# EXERCISE m0.2 — Brand & Theme Setup (Inixindo Bandung)
+# EXERCISE m1.1 — Resource Product & Category
 
 ## Tujuan Pembelajaran
-- Menerapkan brand & design system pada panel Filament.
-- Mengonfigurasi warna, nama brand, dan logo di `AdminPanelProvider`.
+- Membuat migration, model, relasi, dan Filament Resource untuk master data.
+- Memakai Form Builder & Table Builder Filament.
 
 ## Kondisi Codebase Saat Ini
-- Panel Filament `/admin` sudah aktif dengan tema default.
-- Brand assets tersedia di `public/images/brand/` (`logo.png`, `footer.png`).
+- Panel Filament ber-brand aktif.
+- Belum ada model/tabel domain (Product, Category).
 
 ## Yang Perlu Dibangun
-Di `app/Providers/Filament/AdminPanelProvider.php`:
-- `->colors([...])` dengan palet brand:
-  - `primary` = `#143564` (navy)
-  - `danger`  = `#EA2339` (merah brand)
-  - `info`    = `#5CAAD5` (sky blue)
-  - `success` = `#1F9254`
-- `->brandName('Inventory Management — Inixindo Bandung')`
-- `->brandLogo(asset('images/brand/logo.png'))`
-- `->brandLogoHeight('2.5rem')`
+1. Migration `categories`: `name`, timestamps.
+2. Migration `products`: `sku` (unique), `name`, `category_id` (FK),
+   `harga_jual`, `harga_modal`, `reorder_point`, `unit`,
+   `current_stock` (default 0), timestamps.
+3. Model `Category` (hasMany Product) & `Product` (belongsTo Category) dengan
+   `$fillable`/`$casts` yang benar.
+4. Factory untuk keduanya.
+5. `CategoryResource` & `ProductResource` (form + table schema).
 
 ## Acceptance Criteria
-- Halaman `/admin` menampilkan logo asli Inixindo dan warna primary navy brand
-  (bukan warna default Filament amber).
+- Pest feature test CRUD Category & Product lulus.
+- Manual walkthrough CRUD di `/admin` berhasil.
