@@ -1,17 +1,17 @@
-# EXERCISE m4.4 — Dashboard: Stok Kritis & Dead Stock
+# EXERCISE m5.1 — Hardening
 
 ## Tujuan Pembelajaran
-- Membuat chart dengan warna kondisional dan query analitik (dead stock).
+- Mengeraskan aplikasi terhadap mass assignment & bypass otorisasi.
+- Memverifikasi proteksi bawaan (rate limit login, CSRF).
 
-## Yang Perlu Dibangun
-1. `InventoryAnalyticsService::criticalStockProducts()` — produk dengan stok
-   kritis/menipis (stok ≤ 1.5× reorder point), diurutkan.
-2. `InventoryAnalyticsService::deadStockProducts(int $days = 60)` — produk tanpa
-   pergerakan stok selama N hari terakhir.
-3. `ChartWidget` bar stok kritis (warna kondisional merah = kritis / kuning =
-   menipis).
-4. `ChartWidget` bar dead stock.
+## Yang Perlu Dibangun / Diverifikasi
+1. `$fillable`/`$guarded` benar di semua Model — khususnya `current_stock`
+   TIDAK boleh di-mass-assign (hanya lewat StockMovementObserver).
+2. Test bypass Policy lewat manipulasi request langsung ke Model (staff tetap
+   ditolak untuk adjustment & delete).
+3. Verifikasi rate limiting login bawaan Filament aktif; dokumentasikan di
+   README. JANGAN nonaktifkan CSRF di form mana pun (default Laravel).
 
 ## Acceptance Criteria
-- Test: query stok kritis & dead stock benar (dengan data uji spesifik).
-- Manual walkthrough kedua chart.
+- Test: bypass UI tetap ditolak Policy/Model.
+- Rate limit login terverifikasi.
