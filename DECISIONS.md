@@ -60,6 +60,17 @@ command interaktif selama pembangunan aplikasi Inventory Management.
   keamanan (CSRF, method HTTP destruktif, test otorisasi, hash password,
   enkripsi nilai sensitif) ke `CLAUDE.md`.
 
+## Akun Demo (m2.1)
+
+Dibuat lewat `UserSeeder` (idempotent `updateOrCreate` by email), BUKAN
+`make:filament-user` (interaktif). Password sama untuk semua: **`password`**.
+
+| Email | Nama | Role (m2.2) |
+|-------|------|-------------|
+| `staff@demo.com` | Staff Gudang | staff |
+| `manager@demo.com` | Manager Inventory | manager |
+| `admin@demo.com` | Administrator | admin |
+
 ## Command Interaktif (ditangani)
 
 - `laravel new` **tidak dipakai** (interaktif) — memakai
