@@ -1,20 +1,14 @@
-# EXERCISE m4.2 — Audit Trail dengan Activity Log
+# EXERCISE m4.3 — Dashboard: Tren Stok Masuk vs Keluar (Live)
 
 ## Tujuan Pembelajaran
-- Mencatat jejak audit otomatis memakai `spatie/laravel-activitylog`.
-
-## Kondisi Codebase Saat Ini
-- StockMovement mencatat pergerakan stok, tapi belum ada activity log.
+- Membuat line chart dengan 2 dataset dan polling (live update).
 
 ## Yang Perlu Dibangun
-1. Trait `LogsActivity` di `StockMovement`:
-   - catat causer (user) otomatis.
-   - deskripsi khusus untuk tipe `adjustment` (mis. "Penyesuaian stok ...").
-2. Relasi `stockActivities()` di `Product` (hasManyThrough Activity via
-   StockMovement) untuk melihat activity log per produk.
-3. RelationManager "Riwayat Audit" di `ProductResource` (read-only).
+1. `InventoryAnalyticsService::movementTrend(int $days = 30)` — total qty
+   masuk (in) vs keluar (out) per hari untuk N hari terakhir (isi 0 untuk hari
+   tanpa movement).
+2. `ChartWidget` line dengan 2 dataset (Masuk & Keluar), `$pollingInterval = '15s'`.
 
 ## Acceptance Criteria
-- Test: activity tercatat otomatis dengan causer & deskripsi benar
-  (adjustment punya deskripsi khusus).
-- Manual walkthrough: tab riwayat menampilkan log per produk.
+- Test: data agregat per hari benar.
+- Manual walkthrough: chart live update tanpa reload.
