@@ -1,15 +1,18 @@
-# EXERCISE m5.2 — Testing Lengkap dengan Pest
+# EXERCISE m5.3 — Dashboard Analytics Lanjutan
 
 ## Tujuan Pembelajaran
-- Membuktikan otorisasi lewat automated test yang menyeluruh (pemenuhan
-  langsung guideline security Spatie).
+- Chart lanjutan: horizontal bar & mixed (bar+line) dalam satu `getData()`.
 
 ## Yang Perlu Dibangun
-1. Authorization matrix test: staff/manager/admin × semua Resource
-   (Product, Category, Supplier, StockMovement, Role) untuk ability
-   view/create/update/delete/forceDelete.
-2. Pastikan test masking, audit trail, dan seluruh widget dashboard sudah
-   tercakup (dari modul sebelumnya).
+1. `InventoryAnalyticsService::topMovingProducts(int $days = 30, int $limit = 10)`
+   — produk paling banyak keluar (fast-moving).
+2. `InventoryAnalyticsService::abcAnalysis()` — klasifikasi Pareto berbasis
+   nilai inventory (A ≤80%, B ≤95%, C sisanya) dengan cumulative %.
+3. `ChartWidget` Top 10 fast-moving (horizontal bar).
+4. `ChartWidget` ABC Analysis (mixed bar + line dalam satu `getData()`).
+5. Keduanya `canView()` manager/admin only (melibatkan/berdekatan dengan data
+   nilai/harga modal).
 
 ## Acceptance Criteria
-- `php artisan test` hijau (seluruh suite).
+- Test data akurat terhadap data uji spesifik.
+- Manual walkthrough kedua chart.
