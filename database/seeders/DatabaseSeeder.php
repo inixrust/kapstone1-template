@@ -2,15 +2,16 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Seed the application's database.
+     *
+     * Catatan: TIDAK memakai WithoutModelEvents karena DemoDataSeeder bergantung
+     * pada StockMovementObserver (recalc current_stock) dan activity log yang
+     * berjalan lewat model events.
      */
     public function run(): void
     {
@@ -18,6 +19,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             ShieldSeeder::class,
             RoleSeeder::class,
+            DemoDataSeeder::class,
         ]);
     }
 }

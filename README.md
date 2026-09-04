@@ -1,58 +1,175 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Inventory Management — Inixindo Bandung
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi **Inventory Management** (single warehouse) berbasis **Laravel 13 +
+Filament 5**, dengan otorisasi role-based (Laravel Policy + `spatie/laravel-permission`
+via Filament Shield), masking data sensitif (harga modal), audit trail koreksi
+stok (`spatie/laravel-activitylog`), dan **dashboard analytics** memakai widget
+Filament native (Chart.js) — semua ber-brand **Inixindo Bandung**.
 
-## About Laravel
+Aplikasi ini sekaligus **starter kit pelatihan**: setiap fitur punya sepasang
+branch `starter/mX.Y-*` (soal + `EXERCISE.md`) dan `solution/mX.Y-*` (jawaban
+teruji). Lihat [Peta Branch](#peta-branch).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Arsitektur (Penting)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Fullstack di atas Filament 5** (panel/admin berbasis Livewire) — **tidak ada
+  REST API terpisah, tidak ada Swagger.** Filament merender UI lewat Livewire.
+- **CRUD lewat Filament Resource** (Form Builder & Table Builder), bukan
+  komponen Livewire manual.
+- **Dashboard memakai `Filament\Widgets\ChartWidget`** yang di baliknya memakai
+  **Chart.js bawaan Filament** — tidak ada package chart tambahan.
+- **Semua logika agregasi dashboard terpusat** di
+  [`app/Services/InventoryAnalyticsService.php`](app/Services/InventoryAnalyticsService.php).
+  Widget hanya memanggil service (dipersiapkan untuk integrasi Laravel AI SDK,
+  lihat [Next Steps](#next-steps-integrasi-laravel-ai-sdk--rekomendasi)).
 
-## Learning Laravel
+## Tech Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| Komponen | Versi/Catatan |
+|----------|---------------|
+| Laravel | 13 (PHP 8.3+) |
+| Filament | 5 |
+| Database | **MySQL 8** via **Laravel Sail (Docker Desktop)** |
+| RBAC | `spatie/laravel-permission` + `bezhansalleh/filament-shield` |
+| Audit trail | `spatie/laravel-activitylog` |
+| Testing | Pest 4 |
+| Coding standards | Laravel Boost (guidelines + skills) + guideline Spatie |
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Setup (Docker Desktop / Laravel Sail)
 
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Prasyarat: **Docker Desktop** aktif.
 
 ```bash
-composer require laravel/boost --dev
+# 1. Salin env
+cp .env.example .env
 
-php artisan boost:install
+# 2. Bangun & jalankan container (app + MySQL 8)
+docker compose up -d --build
+
+# 3. Generate app key, migrasi, dan seed data demo
+docker compose exec laravel.test php artisan key:generate
+docker compose exec laravel.test php artisan migrate --seed
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Akses panel: **http://localhost:8000/admin**
 
-## Contributing
+> Catatan: file compose bernama `compose.yaml` (default Laravel 13). Port app
+> `8000`, MySQL diteruskan ke host di `3307` (`FORWARD_DB_PORT`). Jalankan semua
+> perintah artisan/composer di dalam container:
+> `docker compose exec laravel.test <perintah>`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Akun Demo
 
-## Code of Conduct
+Seluruh akun memakai password: **`password`**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Email | Role | Hak akses ringkas |
+|-------|------|-------------------|
+| `admin@demo.com` | admin | Super admin — semua akses, kelola role |
+| `manager@demo.com` | manager | Kelola master data & stok, adjustment, lihat harga modal; tanpa hapus permanen & kelola role |
+| `staff@demo.com` | staff | Lihat + input Produk/Pergerakan stok (in/out), tanpa delete, tanpa adjustment, tanpa harga modal |
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Menjalankan Test
 
-## License
+```bash
+docker compose exec laravel.test php artisan test
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Test memakai database MySQL `testing` (dibuat otomatis oleh Sail). Mencakup CRUD
+resource, matriks otorisasi (staff/manager/admin × resource), masking harga
+modal, audit trail, penegakan adjustment di level Model, dan seluruh widget
+dashboard.
+
+---
+
+## Fitur Utama
+
+- **Master Data**: Produk, Kategori, Supplier (+ RelationManager produk per
+  supplier).
+- **Pergerakan Stok**: tipe `in`/`out`/`adjustment`. `current_stock` di-update
+  otomatis oleh `StockMovementObserver` (replay movement — selalu konsisten).
+- **Otorisasi**: 3 role berjenjang via Filament Shield. `adjustment` hanya
+  manager/admin — ditegakkan di **Policy + Observer** (berlaku walau lewat Model
+  langsung, bukan hanya UI).
+- **Masking harga modal**: field & kolom `harga_modal` **hidden total** untuk
+  staff (bukan `****`).
+- **Audit trail**: setiap pergerakan stok tercatat di activity log dengan causer;
+  `adjustment` punya deskripsi khusus. Tab **Riwayat Audit** per produk.
+- **Dashboard** (1 StatsOverview + 7 ChartWidget native Chart.js):
+  1. KPI (StatsOverview) — nilai inventory hanya manager/admin.
+  2. Stok per kategori (bar).
+  3. Nilai inventory per kategori (doughnut, manager/admin).
+  4. Tren stok masuk vs keluar 30 hari (line, live polling 15s).
+  5. Stok kritis & menipis (bar warna kondisional).
+  6. Dead stock (bar).
+  7. Top 10 fast-moving (horizontal bar, manager/admin).
+  8. Analisis ABC / Pareto (bar + line, manager/admin).
+
+## Keamanan (ringkas)
+
+- Mass assignment ditutup: `current_stock` di luar `$fillable` (hanya via
+  Observer).
+- Rate limiting login bawaan Filament aktif (5 percobaan).
+- CSRF tetap aktif (middleware `PreventRequestForgery`), password di-hash.
+- Detail keputusan di [`DECISIONS.md`](DECISIONS.md).
+
+## Coding Standards
+
+- **Laravel Boost** memasang guidelines ke `CLAUDE.md` dan skills ke
+  `.claude/skills/` (termasuk `laravel-best-practices`).
+- **Guideline Spatie** tersedia di
+  [`docs/laravel-php-guidelines.md`](docs/laravel-php-guidelines.md) + prinsip
+  keamanan di `CLAUDE.md`.
+
+---
+
+## Peta Branch
+
+16 fitur (`mX.Y`), tiap fitur sepasang branch `starter/` (soal) & `solution/`
+(jawaban). `main` = hasil merge `solution/m5.4-capstone`.
+
+| Modul | Fitur | Slug branch |
+|-------|-------|-------------|
+| 0 | m0.1 Backend Bootstrap | `*/m0.1-backend-bootstrap` |
+| 0 | m0.2 Brand & Theme | `*/m0.2-brand-theme` |
+| 1 | m1.1 Product & Category | `*/m1.1-product-category` |
+| 1 | m1.2 Supplier & Relasi | `*/m1.2-supplier` |
+| 2 | m2.1 Auth & Login | `*/m2.1-auth-login` |
+| 2 | m2.2 Role & Shield | `*/m2.2-shield-roles` |
+| 3 | m3.1 Stock Movement | `*/m3.1-stock-movement` |
+| 3 | m3.2 Dashboard Dasar | `*/m3.2-dashboard-basic` |
+| 4 | m4.1 Masking Harga Modal | `*/m4.1-cost-masking` |
+| 4 | m4.2 Audit Trail | `*/m4.2-audit-trail` |
+| 4 | m4.3 Tren Stok (Live) | `*/m4.3-trend-chart` |
+| 4 | m4.4 Kritis & Dead Stock | `*/m4.4-critical-deadstock` |
+| 5 | m5.1 Hardening | `*/m5.1-hardening` |
+| 5 | m5.2 Testing Lengkap | `*/m5.2-testing` |
+| 5 | m5.3 Dashboard Lanjutan | `*/m5.3-advanced-dashboard` |
+| 5 | m5.4 Capstone | `*/m5.4-capstone` |
+
+---
+
+## Next Steps: Integrasi Laravel AI SDK & Rekomendasi
+
+Aplikasi ini disiapkan untuk dikembangkan dengan **Laravel AI SDK**
+(`laravel/ai`) tanpa refactor besar. Seluruh logika agregasi sudah terpusat dan
+bersifat **read-only** di `app/Services/InventoryAnalyticsService.php` — method
+seperti `stockByCategory()`, `criticalStockProducts()`, `deadStockProducts()`,
+`movementTrend()`, `topMovingProducts()`, dan `abcAnalysis()` bisa langsung
+dibungkus menjadi **Tool read-only** untuk sebuah AI agent (mis. "kategori mana
+yang nilai inventory-nya paling besar?", "produk apa yang mendekati stok
+kritis?") tanpa menduplikasi query.
+
+Untuk aksi yang **mengubah data** — misalnya tool yang otomatis membuat
+rekomendasi/purchase order atau menyesuaikan stok — sebaiknya memakai fitur
+**human-in-the-loop approval** dari `laravel/ai` (`Approvable` +
+`InteractsWithApprovals`). Pola ini konsisten dengan pembatasan peran yang sudah
+dibangun di aplikasi ini: aksi sensitif seperti `adjustment` stok hanya boleh
+dilakukan manager/admin. Dengan menuntut persetujuan manusia berwenang sebelum
+tool AI mengeksekusi perubahan, kebijakan otorisasi yang sama tetap ditegakkan
+walau pemicunya adalah agen AI, bukan klik manual di UI.

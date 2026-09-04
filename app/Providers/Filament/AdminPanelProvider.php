@@ -11,6 +11,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -18,6 +19,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -62,6 +64,14 @@ class AdminPanelProvider extends PanelProvider
             ->plugins([
                 FilamentShieldPlugin::make(),
             ])
+            ->renderHook(
+                PanelsRenderHook::FOOTER,
+                fn (): HtmlString => new HtmlString(
+                    '<div style="display:flex;justify-content:center;padding:1rem 0;opacity:.85">'
+                    .'<img src="'.asset('images/brand/footer.png').'" alt="Inixindo Bandung" style="max-height:28px">'
+                    .'</div>'
+                ),
+            )
             ->authMiddleware([
                 Authenticate::class,
             ]);
