@@ -1,18 +1,20 @@
-# EXERCISE m5.3 — Dashboard Analytics Lanjutan
+# EXERCISE m5.4 — Brand Polish & Capstone
 
 ## Tujuan Pembelajaran
-- Chart lanjutan: horizontal bar & mixed (bar+line) dalam satu `getData()`.
+- Finalisasi brand, dokumentasi, dan data demo untuk walkthrough.
 
 ## Yang Perlu Dibangun
-1. `InventoryAnalyticsService::topMovingProducts(int $days = 30, int $limit = 10)`
-   — produk paling banyak keluar (fast-moving).
-2. `InventoryAnalyticsService::abcAnalysis()` — klasifikasi Pareto berbasis
-   nilai inventory (A ≤80%, B ≤95%, C sisanya) dengan cumulative %.
-3. `ChartWidget` Top 10 fast-moving (horizontal bar).
-4. `ChartWidget` ABC Analysis (mixed bar + line dalam satu `getData()`).
-5. Keduanya `canView()` manager/admin only (melibatkan/berdekatan dengan data
-   nilai/harga modal).
+1. Review brand final di seluruh panel (logo, warna, footer).
+2. `DemoDataSeeder` — kategori, supplier, produk, stock movement realistis
+   (mengandung kasus stok kritis, dead stock, fast-moving) untuk mengisi
+   dashboard.
+3. `README.md` final: setup Docker/Sail, seeder, akun demo, cara test, catatan
+   arsitektur Filament + Chart.js (tanpa API terpisah), jalur guideline/skill
+   Laravel Boost, DAN section "Next Steps: Integrasi Laravel AI SDK &
+   Rekomendasi" (konseptual, tanpa kode).
+4. `PROGRESS.md` — ringkasan capstone + peta branch.
 
 ## Acceptance Criteria
-- Test data akurat terhadap data uji spesifik.
-- Manual walkthrough kedua chart.
+- `php artisan test` sukses penuh.
+- README lengkap termasuk section Next Steps.
+- Brand konsisten.
