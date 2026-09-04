@@ -24,6 +24,16 @@ command interaktif selama pembangunan aplikasi Inventory Management.
   (menghindari bentrok MySQL lokal). `WWWGROUP=1000`/`WWWUSER=1000` di-set di
   `.env` agar build image Sail sukses saat dijalankan dari Git Bash di Windows.
 
+## Brand & Theme (m0.2)
+
+- Palet: `primary #143564` (navy), `danger #EA2339`, `info #5CAAD5`,
+  `success #1F9254`. **`success` di luar brand asset resmi** — dipilih hijau
+  standar yang kontras baik dengan navy untuk badge "stok aman".
+- **Font: default Filament (Inter).** Tidak override ke Poppins agar tidak
+  menambah dependency font & menjaga performa; cukup untuk kebutuhan brand.
+- Logo brand portrait (420x504) dipakai apa adanya via `brandLogo()` dengan
+  `brandLogoHeight('2.5rem')`.
+
 ## Versi Paket
 
 - **Filament 5** (`filament/filament` v5.7.x) — sesuai spesifikasi. (Filament 4

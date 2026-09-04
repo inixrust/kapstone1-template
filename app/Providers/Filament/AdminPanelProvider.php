@@ -28,8 +28,14 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->brandName('Inventory Management — Inixindo Bandung')
+            ->brandLogo(asset('images/brand/logo.png'))
+            ->brandLogoHeight('2.5rem')
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::hex('#143564'), // navy Inixindo
+                'danger' => Color::hex('#EA2339'),  // merah brand — badge/alert stok kritis
+                'info' => Color::hex('#5CAAD5'),    // sky blue
+                'success' => Color::hex('#1F9254'), // di luar brand asset, lihat DECISIONS.md
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
