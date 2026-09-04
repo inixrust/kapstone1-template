@@ -1,19 +1,20 @@
-# EXERCISE m4.1 — Masking Harga Modal
+# EXERCISE m4.2 — Audit Trail dengan Activity Log
 
 ## Tujuan Pembelajaran
-- Menyembunyikan data sensitif (harga modal) dari role tertentu di level UI
-  Filament — hidden total, bukan obfuscation `****`.
+- Mencatat jejak audit otomatis memakai `spatie/laravel-activitylog`.
 
 ## Kondisi Codebase Saat Ini
-- ProductResource menampilkan `harga_modal` di form & table untuk semua role.
+- StockMovement mencatat pergerakan stok, tapi belum ada activity log.
 
 ## Yang Perlu Dibangun
-1. `harga_modal` di `ProductForm` dan `ProductsTable` `->visible()` hanya untuk
-   manager/admin. Untuk staff, elemennya HILANG total (tidak ada di DOM),
-   bukan disamarkan.
-2. Beri komentar alasan di kode.
-3. (Opsional) tambahkan ability `viewCost` di `ProductPolicy`.
+1. Trait `LogsActivity` di `StockMovement`:
+   - catat causer (user) otomatis.
+   - deskripsi khusus untuk tipe `adjustment` (mis. "Penyesuaian stok ...").
+2. Relasi `stockActivities()` di `Product` (hasManyThrough Activity via
+   StockMovement) untuk melihat activity log per produk.
+3. RelationManager "Riwayat Audit" di `ProductResource` (read-only).
 
 ## Acceptance Criteria
-- Test: elemen form/kolom `harga_modal` tidak ada sama sekali untuk staff,
-  tetap ada untuk manager/admin.
+- Test: activity tercatat otomatis dengan causer & deskripsi benar
+  (adjustment punya deskripsi khusus).
+- Manual walkthrough: tab riwayat menampilkan log per produk.
