@@ -1,21 +1,21 @@
-# EXERCISE m1.2 — Resource Supplier & Relasi
+# EXERCISE m2.1 — Auth & Branding Login
 
 ## Tujuan Pembelajaran
-- Membuat relasi antar-entitas dan RelationManager Filament.
+- Memanfaatkan halaman login bawaan Filament yang sudah ber-brand.
+- Menyediakan akun demo lewat Seeder (bukan `make:filament-user` yang interaktif).
 
 ## Kondisi Codebase Saat Ini
-- Sudah ada Product & Category beserta resource-nya.
-- Belum ada entitas Supplier.
+- Panel `/admin` ber-brand aktif; login page bawaan Filament.
+- Belum ada akun demo.
 
 ## Yang Perlu Dibangun
-1. Migration `suppliers`: `name`, `email` (nullable), `phone` (nullable),
-   `address` (nullable), timestamps.
-2. Migration menambah `supplier_id` (nullable FK) ke `products`.
-3. Model `Supplier` (hasMany Product) & update `Product` (belongsTo Supplier).
-4. `SupplierResource` (form + table).
-5. `ProductsRelationManager` di `SupplierResource` — menampilkan produk milik
-   supplier tersebut.
+1. Seeder membuat 3 user demo (idempotent, `updateOrCreate` by email):
+   - `staff@demo.com`
+   - `manager@demo.com`
+   - `admin@demo.com`
+   Password sama untuk semua (didokumentasikan di README/DECISIONS).
+2. Panggil seeder dari `DatabaseSeeder`.
 
 ## Acceptance Criteria
-- Pest feature test CRUD Supplier lulus.
-- RelationManager menampilkan produk supplier dengan benar (teruji).
+- Test login ketiga akun berhasil (autentikasi via halaman login Filament).
+- Manual walkthrough branding login benar (logo & warna brand).
