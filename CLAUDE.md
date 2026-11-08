@@ -136,19 +136,4 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 </laravel-boost-guidelines>
 
-## Coding Standards (Spatie)
-
-Sebelum menulis kode di project Laravel/PHP ini, baca dulu panduan di
-@docs/laravel-php-guidelines.md (Spatie Laravel & PHP guidelines). Ikuti juga
-prinsip keamanan aplikasi berikut dari Spatie:
-
-- Semua form pakai CSRF token (default Laravel, jangan dimatikan).
-- Aksi destruktif (delete/update) pakai method HTTP DELETE/PUT, bukan GET.
-- Setiap fitur dengan otorisasi WAJIB punya automated test yang membuktikan
-  hanya user berwenang yang bisa mengaksesnya.
-- Password di-hash (default Laravel).
-- Nilai sensitif yang disimpan di database (API key/secret, kalau ada) harus
-  dienkripsi, bukan plaintext.
-
-Guideline & skill resmi Laravel juga aktif via Laravel Boost (lihat blok
-`<laravel-boost-guidelines>` di atas dan folder `.ai/`).
+@AGENTS.md

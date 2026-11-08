@@ -47,12 +47,21 @@ Prasyarat: **Docker Desktop** aktif.
 # 1. Salin env
 cp .env.example .env
 
-# 2. Bangun & jalankan container (app + MySQL 8)
+# 2. Pasang dependency PHP lewat container (vendor/ belum ada setelah clone,
+#    padahal compose.yaml mem-build image dari vendor/laravel/sail)
+docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v "$(pwd):/var/www/html" \
+    -w /var/www/html \
+    laravelsail/php84-composer:latest \
+    composer install --ignore-platform-reqs
+
+# 3. Bangun & jalankan container (app + MySQL 8)
 docker compose up -d --build
 
-# 3. Generate app key, migrasi, dan seed data demo
-docker compose exec laravel.test php artisan key:generate
-docker compose exec laravel.test php artisan migrate --seed
+# 4. Generate app key, migrasi, dan seed data demo (selalu sebagai user sail)
+docker compose exec -u sail laravel.test php artisan key:generate
+docker compose exec -u sail laravel.test php artisan migrate --seed
 ```
 
 Akses panel: **http://localhost:8000/admin**
@@ -60,7 +69,7 @@ Akses panel: **http://localhost:8000/admin**
 > Catatan: file compose bernama `compose.yaml` (default Laravel 13). Port app
 > `8000`, MySQL diteruskan ke host di `3307` (`FORWARD_DB_PORT`). Jalankan semua
 > perintah artisan/composer di dalam container:
-> `docker compose exec laravel.test <perintah>`.
+> `docker compose exec -u sail laravel.test <perintah>`.
 
 ### Akun Demo
 
@@ -77,7 +86,7 @@ Seluruh akun memakai password: **`password`**
 ## Menjalankan Test
 
 ```bash
-docker compose exec laravel.test php artisan test
+docker compose exec -u sail laravel.test php artisan test
 ```
 
 Test memakai database MySQL `testing` (dibuat otomatis oleh Sail). Mencakup CRUD

@@ -1,47 +1,50 @@
-<laravel-boost-guidelines>
-# Laravel Application
+<!-- bmad:context -->
+<!-- Verified 2026-11-08 against 8ddfceb. Managed by bmad-project-context; edits inside this block are replaced on refresh. Keep anything you want preserved outside the markers. -->
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
+## inventory (Inixindo Bandung)
 
-## Prerequisites
+Inventory management satu gudang: Laravel 13 + Filament 5 (Livewire, tanpa REST API), Spatie Permission via Filament Shield, activitylog, Pest 4, MySQL 8.4 di Laravel Sail. Keputusan teknis ada di `DECISIONS.md`, ringkasan fitur di `PROGRESS.md`, artefak BMad di `_bmad-output/`. Guideline Laravel Boost ada di `CLAUDE.md`; aturan di blok ini mengalahkannya bila bertentangan.
 
-Verify that PHP and Composer are available:
+## Policy
 
-```sh
-php -v
-composer -V
-```
+- Sebelum menulis kode PHP, baca @docs/laravel-php-guidelines.md (guideline Spatie); pengecualiannya ada di "Conventions" di bawah.
+- Semua form pakai CSRF token (default Laravel, jangan dimatikan).
+- Aksi destruktif (delete/update) pakai method HTTP DELETE/PUT, bukan GET.
+- Setiap fitur dengan otorisasi WAJIB punya automated test yang membuktikan hanya user berwenang yang bisa mengaksesnya.
+- Password di-hash (default Laravel).
+- Nilai sensitif yang disimpan di database (API key/secret, kalau ada) harus dienkripsi, bukan plaintext.
+- Jangan pernah memasang PHP/Composer di host; semua runtime lewat container Sail.
+- Jangan mengubah migrasi yang sudah ada; buat migrasi baru.
 
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
+## Where things are
 
-macOS:
+- Agregasi dashboard: `app/Services/InventoryAnalyticsService.php`; widget hanya memanggil service ini.
+- Perhitungan stok: `app/Observers/StockMovementObserver.php`; aturan akses di `app/Policies/`.
+- Role → permission: `database/seeders/RoleSeeder.php`; permission Shield (`Action:Resource`) dibuat ulang oleh `ShieldSeeder`.
+- Helper test (`userWithRole()`, `adminUser()`): `tests/Pest.php`.
+- Skill Laravel Boost: `.claude/skills/` (mis. `laravel-best-practices`, `testing-best-practices`).
 
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.5)"
-```
+## Running and verifying
 
-Windows PowerShell:
+- Jalankan setiap perintah `php`, `artisan`, `composer`, `vendor/bin/*` sebagai `docker compose exec -T -u sail laravel.test <perintah>` — termasuk semua perintah polos di guideline Boost `CLAUDE.md`.
+- Jangan pernah menghilangkan `-u sail`: perintah sebagai root membuat berkas cache milik root dan server web lalu error 500 `touch(): Utime failed`.
+- Test: `docker compose exec -T -u sail laravel.test php artisan test --compact [path|--filter=...]`; memakai database MySQL `testing` (phpunit.xml), bukan database dev.
+- Format: `docker compose exec -T -u sail laravel.test vendor/bin/pint --dirty --format agent`.
+- Clone baru belum punya `vendor/`, dan `compose.yaml` mem-build image dari `vendor/laravel/sail/runtimes/8.5` — jalankan `composer install` lewat container Composer Sail dulu (README, langkah Setup), bukan Composer host.
 
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://php.new/install/windows/8.5'))
-```
+## Conventions that differ from defaults
 
-Linux:
+- Taruh test baru di `tests/Feature/`, bukan mirror `app/` seperti saran Spatie — `tests/Pest.php` hanya memasang `TestCase` + `RefreshDatabase` di `Feature`, dan `phpunit.xml` hanya menjalankan `tests/Feature` dan `tests/Unit`.
+- Migrasi baru tetap menulis `down()`, mengikuti migrasi yang ada (penyimpangan sadar dari Spatie, lihat `PROGRESS.md`).
+- `current_stock` hanya berubah lewat record `StockMovement` (Observer me-replay semua movement); jangan menulisnya langsung atau menambahkannya ke `$fillable`.
+- `adjustment` hanya untuk manager/admin dan ditegakkan di Policy + Observer; jalur baru yang mengubah stok harus membuat `StockMovement` lewat model, bukan query builder, agar Observer tetap berlaku.
+- Harga modal (dan nilai turunannya seperti nilai inventory) harus tersembunyi total untuk staff, bukan `****`: gate setiap field, kolom, widget, atau ekspor baru dengan `can('viewCost', Product::class)`.
+- Resource Filament baru: tambahkan ke daftar resource di `RoleSeeder` dan ke test matriks otorisasi.
+- Test otorisasi memakai `userWithRole('staff')`/`userWithRole('manager')`; `adminUser()` melewati semua policy (Shield `intercept_gate = before`), jadi tidak membuktikan apa pun soal akses.
+- Teks antarmuka berbahasa Indonesia, ditulis langsung lewat `->label('...')` seperti resource lain (tidak memakai berkas `lang/`).
 
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
-```
+## Known pitfalls
 
-After installation, ask the user to restart their terminal. If the agent needs the restarted shell to continue, ask the user to reopen their terminal and rerun their original prompt.
+- Bila `docker` tidak ditemukan di WSL, minta user mengaktifkan WSL integration di Docker Desktop; jangan beralih ke PHP host. MCP Laravel Boost juga gagal di host karena `php` tidak ada di PATH.
 
-## Agent Setup
-
-Install Laravel Boost from the application root before making application changes:
-
-```sh
-composer require laravel/boost --dev
-php artisan boost:install
-```
-
-Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
-</laravel-boost-guidelines>
+<!-- /bmad:context -->

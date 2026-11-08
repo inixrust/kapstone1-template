@@ -259,15 +259,7 @@ $failedChecks = $site->checks()->where('status', 'failed')->get();
 - Use descriptive test method names
 - Follow the arrange-act-assert pattern
 - Assert behavior, not setup. Re-checking a config value you set in the arrange step, or that a component renders a hardcoded label, proves nothing; a test should fail when the code under test breaks
-- Mirror the `app/` directory structure under `tests/`; don't split tests into `Feature/` and `Unit/` directories:
-  ```
-  app/Http/Controllers/UserController.php
-  tests/Http/Controllers/UserControllerTest.php
-
-  app/Domain/User/Actions/CreateUserAction.php
-  tests/Domain/User/Actions/CreateUserActionTest.php
-  ```
-- Deviate from the mirror when a specific scenario calls for it
+- Test directory layout: project override in `AGENTS.md` (Spatie's mirror-`app/` rule is not used here).
 - Place shared test helpers under the `Tests\TestSupport` namespace (e.g. `Tests\TestSupport\Models`)
 
 ## Quick Reference
@@ -292,7 +284,7 @@ $failedChecks = $site->checks()->where('status', 'failed')->get();
 - Enums: descriptive name, no prefix (`OrderStatus`, `BookingType`)
 
 ### Migrations
-- do not write down methods in migrations, only up methods
+- Migration `down()` methods: project override in `AGENTS.md` (Spatie's up-only rule is not used here).
 
 ### Code Quality Reminders
 
