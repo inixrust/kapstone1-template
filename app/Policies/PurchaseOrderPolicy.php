@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Enums\PurchaseOrderStatus;
 use App\Models\PurchaseOrder;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
 /**
- * Admin melewati semua ability di sini (Shield `intercept_gate = before`);
- * aturan status ditegakkan juga di PurchaseOrderObserver dan PurchaseOrder::submit().
+ * Admin memegang semua permission Shield, jadi lolos setiap cek `Action:PurchaseOrder`;
+ * aturan status dan larangan pembuat memutuskan PO sendiri ditegakkan juga di
+ * PurchaseOrderObserver dan method transisi PurchaseOrder.
  */
 class PurchaseOrderPolicy
 {
@@ -50,6 +52,29 @@ class PurchaseOrderPolicy
         }
 
         return $authUser->can('Update:PurchaseOrder');
+    }
+
+    /**
+     * Hanya admin yang boleh memutuskan PO. Larangan pembuat memutuskan PO
+     * sendiri ditegakkan di PurchaseOrder::approve()/reject(), bukan di sini.
+     */
+    public function approve(AuthUser $authUser, PurchaseOrder $purchaseOrder): bool
+    {
+        return $this->canDecide($authUser, $purchaseOrder);
+    }
+
+    public function reject(AuthUser $authUser, PurchaseOrder $purchaseOrder): bool
+    {
+        return $this->canDecide($authUser, $purchaseOrder);
+    }
+
+    private function canDecide(AuthUser $authUser, PurchaseOrder $purchaseOrder): bool
+    {
+        if ($purchaseOrder->status !== PurchaseOrderStatus::Submitted) {
+            return false;
+        }
+
+        return $authUser->hasRole('admin');
     }
 
     public function delete(AuthUser $authUser, PurchaseOrder $purchaseOrder): bool

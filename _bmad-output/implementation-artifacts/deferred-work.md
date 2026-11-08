@@ -13,3 +13,9 @@
 - source_spec: `_bmad-output/specs/spec-purchase-order/stories/1-buat-draft-po-dari-produk-kritis.md`
   summary: Tambah test cabang sekunder story 1 (Repeater tanpa `fake()`, notifikasi ajukan PO kosong lewat UI, 403 edit PO non-draft untuk admin, dua draft simultan).
   evidence: Sudah terdaftar di checklist ATDD bagian "Cabang sekunder" untuk `/bmad-testarch-automate`; belum ada test yang menjalankannya.
+- source_spec: `_bmad-output/specs/spec-purchase-order/stories/2-persetujuan-po-oleh-admin.md`
+  summary: Perbaiki `brownfield.md`, `AGENTS.md`, dan komentar `RoleSeeder` yang menyebut admin melewati semua Policy lewat Shield `intercept_gate = before`.
+  evidence: `config/filament-shield.php` memakai `define_via_gate = false`, sehingga `FilamentShieldServiceProvider` tidak memasang `Gate::before`; admin lolos hanya karena memegang semua permission, dan ability kustom yang tidak memeriksa permission (mis. `return false`) tetap menolak admin — ditemukan saat AC-1/AC-2 story 2 gagal.
+- source_spec: `_bmad-output/specs/spec-purchase-order/stories/2-persetujuan-po-oleh-admin.md`
+  summary: Tambah test cabang sekunder story 2 (catatan tersimpan saat menyetujui, `decided_at` terisi, `reject('')` di domain, aksi tersembunyi untuk admin pembuat dan PO non-diajukan).
+  evidence: Terdaftar di checklist ATDD story 2 bagian "Cabang sekunder"; perilaku sudah diimplementasikan tetapi belum ada test yang menjalankannya.

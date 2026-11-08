@@ -32,6 +32,16 @@ class PurchaseOrderInfolist
                         TextEntry::make('created_at')
                             ->label('Dibuat')
                             ->dateTime('d M Y H:i'),
+                        TextEntry::make('decider.name')
+                            ->label('Diputuskan oleh')
+                            ->placeholder('-'),
+                        TextEntry::make('decided_at')
+                            ->label('Diputuskan')
+                            ->dateTime('d M Y H:i')
+                            ->placeholder('-'),
+                        TextEntry::make('decision_note')
+                            ->label('Catatan keputusan')
+                            ->placeholder('-'),
                         // Total dihitung dari harga modal: hidden total untuk staff.
                         TextEntry::make('total')
                             ->label('Total')

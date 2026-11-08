@@ -17,8 +17,9 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 /**
- * `number`, `status`, dan `created_by` sengaja tidak fillable: nilainya diisi
- * PurchaseOrderObserver dan status hanya berubah lewat method transisi.
+ * `number`, `status`, `created_by`, dan kolom keputusan (`decided_*`,
+ * `decision_note`) sengaja tidak fillable: nilainya diisi PurchaseOrderObserver
+ * atau method transisi.
  */
 #[ObservedBy(PurchaseOrderObserver::class)]
 class PurchaseOrder extends Model
@@ -35,6 +36,7 @@ class PurchaseOrder extends Model
     {
         return [
             'status' => PurchaseOrderStatus::class,
+            'decided_at' => 'datetime',
         ];
     }
 
@@ -74,6 +76,12 @@ class PurchaseOrder extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /** @return BelongsTo<User, $this> */
+    public function decider(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'decided_by');
+    }
+
     /** @return HasMany<PurchaseOrderItem, $this> */
     public function items(): HasMany
     {
@@ -111,6 +119,68 @@ class PurchaseOrder extends Model
         }
 
         $this->status = PurchaseOrderStatus::Submitted;
+        $this->save();
+    }
+
+    /**
+     * Setujui PO yang diajukan (diajukan → disetujui).
+     *
+     * @throws AuthorizationException
+     */
+    public function approve(?string $note = null): void
+    {
+        $this->ensureCanBeDecidedBy(Auth::user(), 'approve');
+
+        $this->decide(PurchaseOrderStatus::Approved, $note);
+    }
+
+    /**
+     * Tolak PO yang diajukan (diajukan → ditolak); catatan wajib.
+     *
+     * @throws AuthorizationException
+     */
+    public function reject(string $note): void
+    {
+        $this->ensureCanBeDecidedBy(Auth::user(), 'reject');
+
+        if (blank($note)) {
+            throw new AuthorizationException('Catatan wajib diisi saat menolak purchase order.');
+        }
+
+        $this->decide(PurchaseOrderStatus::Rejected, $note);
+    }
+
+    /**
+     * Larangan pembuat memutuskan PO sendiri dicek langsung di sini, bukan lewat
+     * Policy, karena admin melewati semua Policy (Shield `intercept_gate = before`).
+     *
+     * @throws AuthorizationException
+     */
+    private function ensureCanBeDecidedBy(?User $user, string $ability): void
+    {
+        if ($this->status !== PurchaseOrderStatus::Submitted) {
+            throw new AuthorizationException('Hanya purchase order berstatus diajukan yang dapat diputuskan.');
+        }
+
+        if ($user === null) {
+            throw new AuthorizationException('Keputusan purchase order memerlukan user yang login.');
+        }
+
+        if ($this->created_by === $user->id) {
+            throw new AuthorizationException('Pembuat purchase order tidak dapat memutuskan purchase order sendiri.');
+        }
+
+        if ($user->cannot($ability, $this)) {
+            throw new AuthorizationException('Hanya admin yang dapat menyetujui atau menolak purchase order.');
+        }
+    }
+
+    private function decide(PurchaseOrderStatus $status, ?string $note): void
+    {
+        $this->status = $status;
+        $this->decided_by = Auth::id();
+        $this->decided_at = now();
+        $this->decision_note = blank($note) ? null : $note;
         $this->save();
     }
 }
