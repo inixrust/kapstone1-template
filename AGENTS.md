@@ -30,6 +30,7 @@ Inventory management satu gudang: Laravel 13 + Filament 5 (Livewire, tanpa REST 
 - Jangan pernah menghilangkan `-u sail`: perintah sebagai root membuat berkas cache milik root dan server web lalu error 500 `touch(): Utime failed`.
 - Test: `docker compose exec -T -u sail laravel.test php artisan test --compact [path|--filter=...]`; memakai database MySQL `testing` (phpunit.xml), bukan database dev.
 - Format: `docker compose exec -T -u sail laravel.test vendor/bin/pint --dirty --format agent`.
+- E2E Playwright jalan di host (Node, bukan container) terhadap app Sail yang sudah di-seed: `npm run test:e2e`; memakai database dev, satu worker, dan throttle login Filament 5/menit — detail di `tests/README.md`.
 - Clone baru belum punya `vendor/`, dan `compose.yaml` mem-build image dari `vendor/laravel/sail/runtimes/8.5` — jalankan `composer install` lewat container Composer Sail dulu (README, langkah Setup), bukan Composer host.
 
 ## Conventions that differ from defaults
