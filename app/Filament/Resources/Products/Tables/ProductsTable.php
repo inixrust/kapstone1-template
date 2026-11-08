@@ -9,10 +9,18 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class ProductsTable
 {
+    /** Kunci mengikuti nilai Product::stockStatus(). */
+    private const StockStatusOptions = [
+        'critical' => 'Kritis',
+        'low' => 'Rendah',
+        'safe' => 'Aman',
+    ];
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -74,6 +82,18 @@ class ProductsTable
                     ->relationship('category', 'name')
                     ->searchable()
                     ->preload(),
+                SelectFilter::make('stock_status')
+                    ->label('Status stok')
+                    ->options(self::StockStatusOptions)
+                    ->query(function (Builder $query, array $data): Builder {
+                        $status = $data['value'] ?? null;
+
+                        if (! array_key_exists((string) $status, self::StockStatusOptions)) {
+                            return $query;
+                        }
+
+                        return $query->withStockStatus($status);
+                    }),
             ])
             ->defaultSort('name')
             ->recordActions([

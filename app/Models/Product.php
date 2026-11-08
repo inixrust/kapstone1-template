@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Database\Factories\ProductFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +16,9 @@ class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
     use HasFactory;
+
+    /** Stok <= reorder_point × pengali ini (dibulatkan) dianggap rendah. */
+    public const LowStockMultiplier = 1.5;
 
     /**
      * `current_stock` sengaja TIDAK di-fillable: nilainya hanya boleh berubah
@@ -79,7 +84,7 @@ class Product extends Model
 
     /**
      * Status stok relatif terhadap reorder point.
-     * critical: <= reorder_point; low: <= 1.5x reorder_point; safe: di atas itu.
+     * critical: <= reorder_point; low: <= round(reorder_point × LowStockMultiplier); safe: di atas itu.
      */
     public function stockStatus(): string
     {
@@ -87,10 +92,32 @@ class Product extends Model
             return 'critical';
         }
 
-        if ($this->current_stock <= (int) round($this->reorder_point * 1.5)) {
+        if ($this->current_stock <= (int) round($this->reorder_point * self::LowStockMultiplier)) {
             return 'low';
         }
 
         return 'safe';
+    }
+
+    /**
+     * Padanan query dari stockStatus(). Pengali disisipkan sebagai literal (bukan binding)
+     * agar MySQL menghitung ROUND secara eksak (half away from zero) seperti round() PHP.
+     *
+     * @param  Builder<Product>  $query
+     */
+    #[Scope]
+    protected function withStockStatus(Builder $query, string $status): void
+    {
+        $lowStockThreshold = 'ROUND(reorder_point * '.self::LowStockMultiplier.')';
+
+        match ($status) {
+            'critical' => $query->whereColumn('current_stock', '<=', 'reorder_point'),
+            'low' => $query
+                ->whereColumn('current_stock', '>', 'reorder_point')
+                ->whereRaw("current_stock <= {$lowStockThreshold}"),
+            'safe' => $query
+                ->whereColumn('current_stock', '>', 'reorder_point')
+                ->whereRaw("current_stock > {$lowStockThreshold}"),
+        };
     }
 }

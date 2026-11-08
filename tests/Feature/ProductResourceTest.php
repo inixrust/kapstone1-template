@@ -99,3 +99,88 @@ it('does not allow mass assigning current_stock', function () {
 
     expect($product->current_stock)->toBeNull();
 });
+
+it('filters products by stock status using the model stock status rule', function (string $status) {
+    $products = collect([
+        ['current_stock' => 0, 'reorder_point' => 10],
+        ['current_stock' => 10, 'reorder_point' => 10],
+        ['current_stock' => 11, 'reorder_point' => 10],
+        ['current_stock' => 15, 'reorder_point' => 10],
+        ['current_stock' => 16, 'reorder_point' => 10],
+        ['current_stock' => 11, 'reorder_point' => 7],
+        ['current_stock' => 12, 'reorder_point' => 7],
+        ['current_stock' => 0, 'reorder_point' => 0],
+        ['current_stock' => 1, 'reorder_point' => 0],
+    ])->map(fn (array $attributes): Product => Product::factory()->create($attributes));
+
+    [$matching, $notMatching] = $products->partition(
+        fn (Product $product): bool => $product->stockStatus() === $status,
+    );
+
+    expect($matching)->not->toBeEmpty();
+
+    livewire(ListProducts::class)
+        ->filterTable('stock_status', $status)
+        ->assertCanSeeTableRecords($matching)
+        ->assertCanNotSeeTableRecords($notMatching);
+})->with(['critical', 'low', 'safe']);
+
+it('classifies stock status boundaries around the reorder point', function (int $currentStock, int $reorderPoint, string $expectedStatus) {
+    $product = Product::factory()->create([
+        'current_stock' => $currentStock,
+        'reorder_point' => $reorderPoint,
+    ]);
+
+    $matchingStatuses = collect(['critical', 'low', 'safe'])
+        ->filter(fn (string $status): bool => Product::withStockStatus($status)->whereKey($product->id)->exists())
+        ->values()
+        ->all();
+
+    expect($product->stockStatus())->toBe($expectedStatus)
+        ->and($matchingStatuses)->toBe([$expectedStatus]);
+})->with([
+    'zero reorder point with zero stock' => [0, 0, 'critical'],
+    'zero reorder point with stock' => [1, 0, 'safe'],
+    'at reorder point' => [10, 10, 'critical'],
+    'just above reorder point' => [11, 10, 'low'],
+    'at low threshold' => [15, 10, 'low'],
+    'above low threshold' => [16, 10, 'safe'],
+    'rounded half up threshold' => [11, 7, 'low'],
+    'above rounded threshold' => [12, 7, 'safe'],
+]);
+
+it('shows all products when the stock status filter is cleared', function () {
+    $products = Product::factory()->count(3)->sequence(
+        ['current_stock' => 1, 'reorder_point' => 10],
+        ['current_stock' => 12, 'reorder_point' => 10],
+        ['current_stock' => 100, 'reorder_point' => 10],
+    )->create();
+
+    livewire(ListProducts::class)
+        ->filterTable('stock_status', 'critical')
+        ->resetTableFilters()
+        ->assertCanSeeTableRecords($products);
+});
+
+it('ignores an unknown stock status filter value', function () {
+    $products = Product::factory()->count(2)->sequence(
+        ['current_stock' => 1, 'reorder_point' => 10],
+        ['current_stock' => 100, 'reorder_point' => 10],
+    )->create();
+
+    livewire(ListProducts::class)
+        ->filterTable('stock_status', 'bogus')
+        ->assertCanSeeTableRecords($products);
+});
+
+it('lets staff filter products by stock status', function () {
+    $this->actingAs(userWithRole('staff'));
+
+    $critical = Product::factory()->create(['current_stock' => 1, 'reorder_point' => 10]);
+    $safe = Product::factory()->create(['current_stock' => 100, 'reorder_point' => 10]);
+
+    livewire(ListProducts::class)
+        ->filterTable('stock_status', 'critical')
+        ->assertCanSeeTableRecords([$critical])
+        ->assertCanNotSeeTableRecords([$safe]);
+});
