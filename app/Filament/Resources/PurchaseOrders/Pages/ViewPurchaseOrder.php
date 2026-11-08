@@ -63,7 +63,7 @@ class ViewPurchaseOrder extends ViewRecord
                         ->rows(3),
                 ])
                 ->action(function (PurchaseOrder $record, array $data): void {
-                    $this->decide(
+                    $this->runTransition(
                         fn () => $record->approve($data['note'] ?? null),
                         successTitle: 'Purchase order disetujui',
                         failureTitle: 'Purchase order gagal disetujui',
@@ -84,10 +84,27 @@ class ViewPurchaseOrder extends ViewRecord
                         ->rows(3),
                 ])
                 ->action(function (PurchaseOrder $record, array $data): void {
-                    $this->decide(
+                    $this->runTransition(
                         fn () => $record->reject($data['note']),
                         successTitle: 'Purchase order ditolak',
                         failureTitle: 'Purchase order gagal ditolak',
+                    );
+                }),
+            Action::make('receive')
+                ->label('Terima')
+                ->icon(Heroicon::OutlinedInboxArrowDown)
+                ->color('success')
+                ->authorize('receive')
+                ->visible(fn (PurchaseOrder $record): bool => $record->status === PurchaseOrderStatus::Approved)
+                ->requiresConfirmation()
+                ->modalHeading('Terima purchase order?')
+                ->modalDescription('Setiap item dicatat sebagai pergerakan stok masuk sesuai jumlah di purchase order.')
+                ->modalSubmitActionLabel('Terima')
+                ->action(function (PurchaseOrder $record): void {
+                    $this->runTransition(
+                        fn () => $record->receive(),
+                        successTitle: 'Purchase order diterima',
+                        failureTitle: 'Purchase order gagal diterima',
                     );
                 }),
             EditAction::make()
@@ -104,10 +121,10 @@ class ViewPurchaseOrder extends ViewRecord
         return $record->created_by !== Auth::id();
     }
 
-    private function decide(Closure $decision, string $successTitle, string $failureTitle): void
+    private function runTransition(Closure $transition, string $successTitle, string $failureTitle): void
     {
         try {
-            $decision();
+            $transition();
         } catch (AuthorizationException $exception) {
             Notification::make()
                 ->title($failureTitle)

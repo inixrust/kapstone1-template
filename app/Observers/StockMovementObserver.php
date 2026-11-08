@@ -31,6 +31,24 @@ class StockMovementObserver
         }
     }
 
+    /**
+     * Movement yang merujuk PO tidak boleh diubah atau dihapus oleh siapa pun
+     * (termasuk admin), agar stok dan jejak penerimaan PO tetap utuh.
+     */
+    public function updating(StockMovement $movement): void
+    {
+        if ($movement->isFromPurchaseOrder()) {
+            throw new AuthorizationException('Pergerakan stok dari penerimaan purchase order tidak dapat diubah.');
+        }
+    }
+
+    public function deleting(StockMovement $movement): void
+    {
+        if ($movement->isFromPurchaseOrder()) {
+            throw new AuthorizationException('Pergerakan stok dari penerimaan purchase order tidak dapat dihapus.');
+        }
+    }
+
     public function created(StockMovement $movement): void
     {
         $this->recalculateStock($movement->product_id);

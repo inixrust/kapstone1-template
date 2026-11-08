@@ -19,3 +19,9 @@
 - source_spec: `_bmad-output/specs/spec-purchase-order/stories/2-persetujuan-po-oleh-admin.md`
   summary: Tambah test cabang sekunder story 2 (catatan tersimpan saat menyetujui, `decided_at` terisi, `reject('')` di domain, aksi tersembunyi untuk admin pembuat dan PO non-diajukan).
   evidence: Terdaftar di checklist ATDD story 2 bagian "Cabang sekunder"; perilaku sudah diimplementasikan tetapi belum ada test yang menjalankannya.
+- source_spec: `_bmad-output/specs/spec-purchase-order/stories/3-penerimaan-barang-po.md`
+  summary: Tambah test cabang sekunder story 3 (receive tanpa login, notifikasi sukses/gagal, aksi Terima hilang setelah diterima, bulk delete movement ber-PO, regresi edit/hapus movement non-PO, rollback migrasi `purchase_order_id`).
+  evidence: Terdaftar di checklist ATDD story 3 bagian "Cabang sekunder"; perilaku sudah diimplementasikan tetapi belum ada test yang menjalankannya.
+- source_spec: `_bmad-output/specs/spec-purchase-order/stories/3-penerimaan-barang-po.md`
+  summary: Koreksi docblock `PurchaseOrder::submit()`/`ensureCanBeDecidedBy()` dan kontrak ATDD yang masih menyebut admin lolos lewat bypass `intercept_gate`.
+  evidence: `define_via_gate = false`; Policy `receive` harus menyebut admin eksplisit agar admin bisa menerima — asumsi "admin lolos lewat bypass" di checklist ATDD story 3 tidak berlaku.

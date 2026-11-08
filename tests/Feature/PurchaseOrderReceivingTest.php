@@ -30,7 +30,7 @@ it('[P0] AC-1 creates one in movement per item referencing the purchase order wh
         ->and($movements->pluck('type')->unique()->all())->toEqual([StockMovementType::In])
         ->and($movements->pluck('user_id')->unique()->all())->toEqual([$staff->id])
         ->and($movements->every(fn (StockMovement $movement): bool => str_contains((string) $movement->note, $purchaseOrder->number)))->toBeTrue();
-})->skip('ATDD red phase: story 3 penerimaan purchase order belum diimplementasikan');
+});
 
 it('[P0] AC-2 increases each product current stock by exactly the received quantity without changing its cost', function () {
     $purchaseOrder = purchaseOrderWithItems('approved', [7, 3]);
@@ -46,7 +46,7 @@ it('[P0] AC-2 increases each product current stock by exactly the received quant
         expect($product->current_stock)->toBe($stockBefore[$item->product_id] + $item->qty)
             ->and($product->harga_modal)->toBe($costBefore[$item->product_id]);
     });
-})->skip('ATDD red phase: story 3 penerimaan purchase order belum diimplementasikan');
+});
 
 it('[P0] AC-3 marks the purchase order as received when staff confirms the receive action', function () {
     $purchaseOrder = purchaseOrderWithItems('approved', [4]);
@@ -56,7 +56,7 @@ it('[P0] AC-3 marks the purchase order as received when staff confirms the recei
         ->callAction('receive');
 
     expect($purchaseOrder->refresh()->status)->toBe(PurchaseOrderStatus::Received);
-})->skip('ATDD red phase: story 3 penerimaan purchase order belum diimplementasikan');
+});
 
 it('[P0] AC-4 rejects receiving a purchase order that is not approved without new movements even for admin', function (string $status) {
     $purchaseOrder = purchaseOrderWithItems($status, [6]);
@@ -69,8 +69,7 @@ it('[P0] AC-4 rejects receiving a purchase order that is not approved without ne
     expect(StockMovement::query()->count())->toBe($movementCountBefore)
         ->and($product->refresh()->current_stock)->toBe(5)
         ->and($purchaseOrder->refresh()->status->value)->toBe($status);
-})->with('unreceivable purchase order statuses')
-    ->skip('ATDD red phase: story 3 penerimaan purchase order belum diimplementasikan');
+})->with('unreceivable purchase order statuses');
 
 it('[P0] AC-5 rolls back every movement and keeps the purchase order approved when one item fails', function () {
     $purchaseOrder = purchaseOrderWithItems('approved', [7, 3]);
@@ -93,7 +92,7 @@ it('[P0] AC-5 rolls back every movement and keeps the purchase order approved wh
     $purchaseOrder->items->each(function (PurchaseOrderItem $item) use ($stockBefore): void {
         expect($item->product->refresh()->current_stock)->toBe($stockBefore[$item->product_id]);
     });
-})->skip('ATDD red phase: story 3 penerimaan purchase order belum diimplementasikan');
+});
 
 it('[P0] AC-6 forbids updating or deleting a movement that references a purchase order even for admin', function (string $operation) {
     $purchaseOrder = purchaseOrderWithItems('received', [7]);
@@ -110,8 +109,7 @@ it('[P0] AC-6 forbids updating or deleting a movement that references a purchase
 
     expect($movement->fresh()?->qty)->toBe(7)
         ->and($product->refresh()->current_stock)->toBe(12);
-})->with(['update', 'delete'])
-    ->skip('ATDD red phase: story 3 penerimaan purchase order belum diimplementasikan');
+})->with(['update', 'delete']);
 
 it('[P0] AC-7 denies staff and manager editing or deleting a movement that references a purchase order', function (string $role) {
     $purchaseOrder = purchaseOrderWithItems('received', [7]);
@@ -127,8 +125,7 @@ it('[P0] AC-7 denies staff and manager editing or deleting a movement that refer
 
     livewire(EditStockMovement::class, ['record' => $movement->getRouteKey()])
         ->assertForbidden();
-})->with(['staff', 'manager'])
-    ->skip('ATDD red phase: story 3 penerimaan purchase order belum diimplementasikan');
+})->with(['staff', 'manager']);
 
 it('[P1] AC-8 shows the receive action to manager and staff only on approved purchase orders', function (string $role) {
     $approvedPurchaseOrder = purchaseOrderWithItems('approved', [4]);
@@ -140,8 +137,7 @@ it('[P1] AC-8 shows the receive action to manager and staff only on approved pur
 
     livewire(ViewPurchaseOrder::class, ['record' => $submittedPurchaseOrder->getRouteKey()])
         ->assertActionHidden('receive');
-})->with(['manager', 'staff'])
-    ->skip('ATDD red phase: story 3 penerimaan purchase order belum diimplementasikan');
+})->with(['manager', 'staff']);
 
 it('[P0] AC-9 logs the receive transition with the receiving user as causer', function () {
     $purchaseOrder = purchaseOrderWithItems('approved', [4]);
@@ -161,4 +157,4 @@ it('[P0] AC-9 logs the receive transition with the receiving user as causer', fu
         ->and($activity->properties['old']['status'])->toBe('approved')
         ->and($activity->causer_id)->toBe($staff->id)
         ->and($activity->log_name)->toBe('purchase_order');
-})->skip('ATDD red phase: story 3 penerimaan purchase order belum diimplementasikan');
+});

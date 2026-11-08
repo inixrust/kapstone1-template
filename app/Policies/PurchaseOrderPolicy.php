@@ -77,6 +77,19 @@ class PurchaseOrderPolicy
         return $authUser->hasRole('admin');
     }
 
+    /**
+     * Penerimaan barang oleh manager atau staff; admin disebut eksplisit karena
+     * Shield tidak memasang bypass gate (`define_via_gate = false`).
+     */
+    public function receive(AuthUser $authUser, PurchaseOrder $purchaseOrder): bool
+    {
+        if ($purchaseOrder->status !== PurchaseOrderStatus::Approved) {
+            return false;
+        }
+
+        return $authUser->hasAnyRole(['admin', 'manager', 'staff']);
+    }
+
     public function delete(AuthUser $authUser, PurchaseOrder $purchaseOrder): bool
     {
         if (! $purchaseOrder->isDraft()) {

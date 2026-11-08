@@ -22,7 +22,7 @@ class StockMovement extends Model
     {
         return LogOptions::defaults()
             ->useLogName('stock_movement')
-            ->logOnly(['product_id', 'type', 'qty', 'note', 'user_id'])
+            ->logOnly(['product_id', 'type', 'qty', 'note', 'user_id', 'purchase_order_id'])
             ->logOnlyDirty()
             ->dontLogEmptyChanges();
     }
@@ -45,6 +45,7 @@ class StockMovement extends Model
         'qty',
         'note',
         'user_id',
+        'purchase_order_id',
     ];
 
     /** @return array<string, string> */
@@ -66,5 +67,19 @@ class StockMovement extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** @return BelongsTo<PurchaseOrder, $this> */
+    public function purchaseOrder(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseOrder::class);
+    }
+
+    /**
+     * Movement hasil penerimaan PO dikunci agar jejak ke PO tetap utuh.
+     */
+    public function isFromPurchaseOrder(): bool
+    {
+        return $this->getRawOriginal('purchase_order_id') !== null;
     }
 }

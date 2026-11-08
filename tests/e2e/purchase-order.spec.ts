@@ -1,8 +1,7 @@
 import { expect, test } from '../support/fixtures';
 
 test.describe('Purchase order', () => {
-    // ATDD red phase: aksi Terima (story 3) belum ada; hapus .skip saat story 3 diimplementasikan.
-    test.skip('[P0] AC-10 manager mengajukan, admin menyetujui, staff menerima, dan stok bertambah sebesar jumlah PO', async ({
+    test('[P0] AC-10 manager mengajukan, admin menyetujui, staff menerima, dan stok bertambah sebesar jumlah PO', async ({
         pageAs,
         createCriticalProduct,
         currentStockOf,
@@ -50,7 +49,7 @@ test.describe('Purchase order', () => {
         const searchResponse = staffPage.waitForResponse(
             (response) => /\/livewire[^/]*\/update/.test(response.url()) && response.request().method() === 'POST',
         );
-        await staffPage.getByPlaceholder('Search').fill(product.productName);
+        await staffPage.getByRole('searchbox', { name: 'Search', exact: true }).fill(product.productName);
         expect((await searchResponse).ok()).toBe(true);
         await expect(
             staffPage.getByRole('row').filter({ hasText: product.productName }).filter({ hasText: purchaseOrderNumber }),

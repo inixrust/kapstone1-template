@@ -36,13 +36,25 @@ class StockMovementPolicy
         return $authUser->hasAnyRole(['manager', 'admin']);
     }
 
+    /**
+     * Movement hasil penerimaan PO dikunci; StockMovementObserver menegakkan
+     * hal yang sama di level Model.
+     */
     public function update(AuthUser $authUser, StockMovement $stockMovement): bool
     {
+        if ($stockMovement->isFromPurchaseOrder()) {
+            return false;
+        }
+
         return $authUser->can('Update:StockMovement');
     }
 
     public function delete(AuthUser $authUser, StockMovement $stockMovement): bool
     {
+        if ($stockMovement->isFromPurchaseOrder()) {
+            return false;
+        }
+
         return $authUser->can('Delete:StockMovement');
     }
 

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PurchaseOrderStatus;
+use App\Enums\StockMovementType;
 use App\Observers\PurchaseOrderObserver;
 use Database\Factories\PurchaseOrderFactory;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -88,6 +90,12 @@ class PurchaseOrder extends Model
         return $this->hasMany(PurchaseOrderItem::class);
     }
 
+    /** @return HasMany<StockMovement, $this> */
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class);
+    }
+
     public function isDraft(): bool
     {
         return $this->status === PurchaseOrderStatus::Draft;
@@ -148,6 +156,66 @@ class PurchaseOrder extends Model
         }
 
         $this->decide(PurchaseOrderStatus::Rejected, $note);
+    }
+
+    /**
+     * Terima PO yang disetujui (disetujui → diterima): satu movement IN per item
+     * lewat model agar StockMovementObserver me-replay stok. Atomik: kegagalan
+     * satu item membatalkan semua movement dan status.
+     *
+     * @throws AuthorizationException
+     */
+    public function receive(): void
+    {
+        $this->ensureCanBeReceivedBy(Auth::user());
+
+        DB::transaction(function (): void {
+            $lockedStatus = static::query()
+                ->whereKey($this->id)
+                ->lockForUpdate()
+                ->value('status');
+
+            if ($lockedStatus !== PurchaseOrderStatus::Approved) {
+                throw new AuthorizationException('Hanya purchase order berstatus disetujui yang dapat diterima.');
+            }
+
+            $this->items()
+                ->orderBy('id')
+                ->get()
+                ->each(function (PurchaseOrderItem $item): void {
+                    StockMovement::create([
+                        'product_id' => $item->product_id,
+                        'type' => StockMovementType::In,
+                        'qty' => $item->qty,
+                        'note' => "Penerimaan {$this->number}",
+                        'user_id' => Auth::id(),
+                        'purchase_order_id' => $this->id,
+                    ]);
+                });
+
+            $this->status = PurchaseOrderStatus::Received;
+            $this->save();
+        });
+    }
+
+    /**
+     * Dicek di domain karena method ini juga bisa dipanggil di luar UI.
+     *
+     * @throws AuthorizationException
+     */
+    private function ensureCanBeReceivedBy(?User $user): void
+    {
+        if ($this->status !== PurchaseOrderStatus::Approved) {
+            throw new AuthorizationException('Hanya purchase order berstatus disetujui yang dapat diterima.');
+        }
+
+        if ($user === null) {
+            throw new AuthorizationException('Penerimaan purchase order memerlukan user yang login.');
+        }
+
+        if ($user->cannot('receive', $this)) {
+            throw new AuthorizationException('Anda tidak berwenang menerima purchase order.');
+        }
     }
 
     /**
