@@ -132,6 +132,32 @@ function purchaseOrderWithItem(string $status = 'draft', array $attributes = [])
 }
 
 /**
+ * PO dengan satu item per jumlah di `$quantities`; tiap item memakai produk kritis
+ * baru (stok awal 5 lewat movement IN) milik supplier PO. Status dipasang lewat
+ * query builder seperti `purchaseOrderWithItem()`.
+ *
+ * @param  list<int>  $quantities
+ * @param  array<string, mixed>  $attributes
+ */
+function purchaseOrderWithItems(string $status, array $quantities, array $attributes = []): PurchaseOrder
+{
+    $supplier = Supplier::factory()->create();
+
+    $purchaseOrder = PurchaseOrder::factory()->for($supplier)->create($attributes);
+
+    foreach ($quantities as $quantity) {
+        PurchaseOrderItem::factory()->for($purchaseOrder)->create([
+            'product_id' => productWithStockFor($supplier, 5)->id,
+            'qty' => $quantity,
+        ]);
+    }
+
+    PurchaseOrder::query()->whereKey($purchaseOrder->id)->update(['status' => $status]);
+
+    return $purchaseOrder->refresh()->load('items.product');
+}
+
+/**
  * Jalankan keputusan domain `approve` atau `reject` (dengan catatan) atas PO,
  * agar dataset keputusan di test persetujuan memakai satu jalur pemanggilan.
  */
