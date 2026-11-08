@@ -130,3 +130,18 @@ function purchaseOrderWithItem(string $status = 'draft', array $attributes = [])
 
     return $purchaseOrder->refresh();
 }
+
+/**
+ * Jalankan keputusan domain `approve` atau `reject` (dengan catatan) atas PO,
+ * agar dataset keputusan di test persetujuan memakai satu jalur pemanggilan.
+ */
+function decidePurchaseOrder(PurchaseOrder $purchaseOrder, string $decision): void
+{
+    if ($decision === 'approve') {
+        $purchaseOrder->approve();
+
+        return;
+    }
+
+    $purchaseOrder->reject('Catatan penolakan');
+}
