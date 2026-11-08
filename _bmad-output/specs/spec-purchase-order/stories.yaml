@@ -1,0 +1,39 @@
+- id: "1"
+  title: Buat draft PO dari produk kritis
+  description: >-
+    CAP-1 di SPEC.md: resource Purchase Order (grup Transaksi) dengan nomor
+    PO-YYYYMM-####, item awal dari produk kritis supplier terpilih, harga
+    default harga_modal yang bisa diubah, dan aksi ajukan (draft → diajukan).
+    Termasuk permission Shield + RoleSeeder + matriks otorisasi, masking harga
+    untuk staff, dan audit perubahan status.
+  spec_checkpoint: false
+  done_checkpoint: false
+  invoke_dev_with: >-
+    Baca SPEC.md, state-machines.md, brownfield.md, dan AGENTS.md. Jalankan
+    ui-consistency:finding-patterns sebelum membangun halaman Filament baru.
+    Jangan commit; fasilitator yang meng-commit.
+- id: "2"
+  title: Persetujuan PO oleh admin
+  description: >-
+    CAP-2 di SPEC.md: aksi setujui/tolak untuk PO berstatus diajukan, catatan
+    wajib saat menolak, dan larangan pembuat memutuskan PO sendiri yang
+    ditegakkan di domain (bukan hanya Policy, karena admin bypass).
+  spec_checkpoint: false
+  done_checkpoint: false
+  invoke_dev_with: >-
+    Bergantung pada story 1. Uji larangan memutuskan sendiri dengan admin
+    sebagai pembuat PO. Jangan commit; fasilitator yang meng-commit.
+- id: "3"
+  title: Penerimaan barang PO
+  description: >-
+    CAP-3 di SPEC.md: aksi terima untuk PO disetujui yang membuat satu
+    movement IN per item merujuk PO (migrasi baru), mengunci movement tersebut
+    dari edit/hapus, dan menandai PO diterima. Menutup epik dengan E2E
+    Playwright alur manager → admin → staff.
+  spec_checkpoint: false
+  done_checkpoint: false
+  invoke_dev_with: >-
+    Bergantung pada story 1 dan 2. E2E memakai database dev: data PO dan
+    movement yang dibuat harus dibersihkan fixture. Setelah selesai, minta
+    menjalankan seluruh suite Pest dan npm run test:e2e. Jangan commit;
+    fasilitator yang meng-commit.
