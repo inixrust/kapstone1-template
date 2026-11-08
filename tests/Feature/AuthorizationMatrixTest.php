@@ -86,5 +86,4 @@ it('[P0] AC-6 enforces the purchase order authorization matrix', function (strin
     $user = userWithRole($role);
 
     expect($user->can($permission))->toBe($expected);
-})->with('purchase order permission expectations')
-    ->skip('ATDD red phase: story 1 purchase order belum diimplementasikan');
+})->with('purchase order permission expectations');

@@ -19,7 +19,7 @@ class RoleSeeder extends Seeder
      *
      * @var list<string>
      */
-    private const DOMAIN_RESOURCES = ['Product', 'Category', 'Supplier', 'StockMovement'];
+    private const DOMAIN_RESOURCES = ['Product', 'Category', 'Supplier', 'StockMovement', 'PurchaseOrder'];
 
     /**
      * Manager: kelola penuh data domain KECUALI hapus permanen (ForceDelete*).
@@ -39,7 +39,8 @@ class RoleSeeder extends Seeder
     private const STAFF_WRITE_ACTIONS = ['ViewAny', 'View', 'Create', 'Update'];
 
     /**
-     * Staff untuk data master lain: hanya baca (untuk memilih di form).
+     * Staff untuk data master lain dan PurchaseOrder: hanya baca (PO dilihat
+     * tanpa harga agar bisa mencatat penerimaan).
      *
      * @var list<string>
      */
@@ -60,7 +61,7 @@ class RoleSeeder extends Seeder
         $manager->syncPermissions($this->permissionsFor(self::DOMAIN_RESOURCES, self::MANAGER_ACTIONS));
 
         $staffPermissions = $this->permissionsFor(['Product', 'StockMovement'], self::STAFF_WRITE_ACTIONS)
-            ->merge($this->permissionsFor(['Category', 'Supplier'], self::STAFF_READ_ACTIONS))
+            ->merge($this->permissionsFor(['Category', 'Supplier', 'PurchaseOrder'], self::STAFF_READ_ACTIONS))
             ->unique('id');
         $staff->syncPermissions($staffPermissions);
 

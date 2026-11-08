@@ -65,4 +65,4 @@ it('[P0] AC-7 hides purchase order item prices and totals from staff but not man
 
     livewire(ViewPurchaseOrder::class, ['record' => $purchaseOrder->getRouteKey()])
         ->assertSeeText('Rp');
-})->skip('ATDD red phase: story 1 purchase order belum diimplementasikan');
+});

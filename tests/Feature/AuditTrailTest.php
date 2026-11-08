@@ -95,7 +95,7 @@ it('[P0] AC-8 logs the submit transition with the causer and old and new status'
         ->and($activity->properties['old']['status'])->toBe('draft')
         ->and($activity->causer_id)->toBe($manager->id)
         ->and($activity->log_name)->toBe('purchase_order');
-})->skip('ATDD red phase: story 1 purchase order belum diimplementasikan');
+});
 
 it('[P0] AC-13 records only the status in purchase order activity, never prices', function () {
     $manager = userWithRole('manager');
@@ -119,4 +119,4 @@ it('[P0] AC-13 records only the status in purchase order activity, never prices'
         ->all();
 
     expect($loggedAttributes)->toBe(['status']);
-})->skip('ATDD red phase: story 1 purchase order belum diimplementasikan');
+});
