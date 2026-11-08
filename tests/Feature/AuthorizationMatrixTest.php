@@ -67,3 +67,24 @@ it('restricts custom abilities per role', function () {
         ->and(userWithRole('staff')->can('viewCost', Product::class))->toBeFalse()
         ->and(userWithRole('manager')->can('viewCost', Product::class))->toBeTrue();
 });
+
+dataset('purchase order permission expectations', [
+    ['manager', 'ViewAny:PurchaseOrder', true],
+    ['manager', 'View:PurchaseOrder', true],
+    ['manager', 'Create:PurchaseOrder', true],
+    ['manager', 'Update:PurchaseOrder', true],
+    ['manager', 'Delete:PurchaseOrder', true],
+    ['manager', 'ForceDelete:PurchaseOrder', false],
+    ['staff', 'ViewAny:PurchaseOrder', true],
+    ['staff', 'View:PurchaseOrder', true],
+    ['staff', 'Create:PurchaseOrder', false],
+    ['staff', 'Update:PurchaseOrder', false],
+    ['staff', 'Delete:PurchaseOrder', false],
+]);
+
+it('[P0] AC-6 enforces the purchase order authorization matrix', function (string $role, string $permission, bool $expected) {
+    $user = userWithRole($role);
+
+    expect($user->can($permission))->toBe($expected);
+})->with('purchase order permission expectations')
+    ->skip('ATDD red phase: story 1 purchase order belum diimplementasikan');

@@ -2,6 +2,8 @@
 
 use App\Filament\Resources\Products\Pages\CreateProduct;
 use App\Filament\Resources\Products\Pages\ListProducts;
+use App\Filament\Resources\PurchaseOrders\Pages\ListPurchaseOrders;
+use App\Filament\Resources\PurchaseOrders\Pages\ViewPurchaseOrder;
 use App\Models\Product;
 
 use function Pest\Livewire\livewire;
@@ -44,3 +46,23 @@ it('grants viewCost only to manager and admin', function () {
         ->and(userWithRole('manager')->can('viewCost', Product::class))->toBeTrue()
         ->and(userWithRole('admin')->can('viewCost', Product::class))->toBeTrue();
 });
+
+it('[P0] AC-7 hides purchase order item prices and totals from staff but not manager', function () {
+    $purchaseOrder = purchaseOrderWithItem();
+    $this->actingAs(userWithRole('staff'));
+
+    livewire(ListPurchaseOrders::class)
+        ->assertTableColumnHidden('total');
+
+    livewire(ViewPurchaseOrder::class, ['record' => $purchaseOrder->getRouteKey()])
+        ->assertSuccessful()
+        ->assertDontSeeText('Rp');
+
+    $this->actingAs(userWithRole('manager'));
+
+    livewire(ListPurchaseOrders::class)
+        ->assertTableColumnVisible('total');
+
+    livewire(ViewPurchaseOrder::class, ['record' => $purchaseOrder->getRouteKey()])
+        ->assertSeeText('Rp');
+})->skip('ATDD red phase: story 1 purchase order belum diimplementasikan');

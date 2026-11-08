@@ -1,5 +1,10 @@
 <?php
 
+use App\Models\Product;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
+use App\Models\StockMovement;
+use App\Models\Supplier;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Database\Seeders\ShieldSeeder;
@@ -84,4 +89,44 @@ function adminUser(): User
     $user->assignRole('admin');
 
     return $user;
+}
+
+/**
+ * Produk milik supplier (atau tanpa supplier) dengan stok awal dibentuk lewat
+ * movement IN, bukan menulis `current_stock`. Reorder point 10: stok <= 10 = kritis.
+ *
+ * @param  array<string, mixed>  $attributes
+ */
+function productWithStockFor(?Supplier $supplier, int $stock, array $attributes = []): Product
+{
+    $product = Product::factory()->create([
+        'supplier_id' => $supplier?->id,
+        'reorder_point' => 10,
+        ...$attributes,
+    ]);
+
+    StockMovement::factory()->for($product)->in($stock)->create();
+
+    return $product->refresh();
+}
+
+/**
+ * PO dengan satu item produk kritis milik supplier PO. Status selain draft dipasang
+ * lewat query builder agar setup tidak melewati penjagaan transisi model.
+ *
+ * @param  array<string, mixed>  $attributes
+ */
+function purchaseOrderWithItem(string $status = 'draft', array $attributes = []): PurchaseOrder
+{
+    $supplier = Supplier::factory()->create();
+
+    $purchaseOrder = PurchaseOrder::factory()->for($supplier)->create($attributes);
+
+    PurchaseOrderItem::factory()->for($purchaseOrder)->create([
+        'product_id' => productWithStockFor($supplier, 5)->id,
+    ]);
+
+    PurchaseOrder::query()->whereKey($purchaseOrder->id)->update(['status' => $status]);
+
+    return $purchaseOrder->refresh();
 }

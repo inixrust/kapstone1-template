@@ -4,7 +4,9 @@ use App\Enums\StockMovementType;
 use App\Filament\Resources\Products\Pages\EditProduct;
 use App\Filament\Resources\Products\RelationManagers\StockActivitiesRelationManager;
 use App\Models\Product;
+use App\Models\PurchaseOrder;
 use App\Models\StockMovement;
+use App\Models\Supplier;
 use Spatie\Activitylog\Models\Activity;
 
 use function Pest\Livewire\livewire;
@@ -74,3 +76,47 @@ it('renders the audit relation manager on the product page', function () {
         'pageClass' => EditProduct::class,
     ])->assertSuccessful();
 });
+
+it('[P0] AC-8 logs the submit transition with the causer and old and new status', function () {
+    $manager = userWithRole('manager');
+    $purchaseOrder = purchaseOrderWithItem(attributes: ['created_by' => $manager->id]);
+    $this->actingAs($manager);
+
+    $purchaseOrder->submit();
+
+    $activity = Activity::query()
+        ->where('subject_type', PurchaseOrder::class)
+        ->where('subject_id', $purchaseOrder->id)
+        ->where('event', 'updated')
+        ->latest('id')
+        ->first();
+
+    expect($activity?->properties['attributes']['status'] ?? null)->toBe('submitted')
+        ->and($activity->properties['old']['status'])->toBe('draft')
+        ->and($activity->causer_id)->toBe($manager->id)
+        ->and($activity->log_name)->toBe('purchase_order');
+})->skip('ATDD red phase: story 1 purchase order belum diimplementasikan');
+
+it('[P0] AC-13 records only the status in purchase order activity, never prices', function () {
+    $manager = userWithRole('manager');
+    $this->actingAs($manager);
+    $purchaseOrder = PurchaseOrder::create(['supplier_id' => Supplier::factory()->create()->id]);
+    $purchaseOrder->items()->create([
+        'product_id' => productWithStockFor($purchaseOrder->supplier, 5)->id,
+        'qty' => 4,
+        'unit_price' => 25_000,
+    ]);
+
+    $purchaseOrder->submit();
+
+    $loggedAttributes = Activity::query()
+        ->where('subject_type', PurchaseOrder::class)
+        ->where('subject_id', $purchaseOrder->id)
+        ->get()
+        ->flatMap(fn (Activity $activity): array => array_keys($activity->properties['attributes'] ?? []))
+        ->unique()
+        ->values()
+        ->all();
+
+    expect($loggedAttributes)->toBe(['status']);
+})->skip('ATDD red phase: story 1 purchase order belum diimplementasikan');
