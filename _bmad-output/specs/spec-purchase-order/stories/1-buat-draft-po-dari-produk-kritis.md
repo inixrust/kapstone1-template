@@ -66,7 +66,7 @@ context:
 
 **Acceptance Criteria:** AC-1 … AC-18 di checklist ATDD, semua hijau; test lama tetap hijau.
 
-## UI checklist (ui-consistency, referensi StockMovementResource — 4 resource, 4 kandidat)
+## UI checklist (ikuti pola resource Filament yang sudah ada; referensi StockMovementResource — 4 resource, 4 kandidat)
 
 - [x] Resource: `$navigationGroup = 'Transaksi'`, `$navigationLabel/$modelLabel/$pluralModelLabel` Indonesia, Heroicon outlined -- pola 4 dari 4.
 - [x] Schemas/Tables di kelas `configure()` terpisah -- 4 dari 4.

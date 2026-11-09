@@ -37,7 +37,7 @@ Pain operasional: manager sering terlambat memesan ulang produk berstatus kritis
 - Stok hanya berubah lewat `StockMovement` yang dibuat lewat model (Observer me-replay); `current_stock` tidak ditulis langsung.
 - Harga modal pada PO (harga per item, subtotal, total) tersembunyi total untuk staff — digate `can('viewCost', Product::class)`, bukan `****`.
 - Setiap perubahan status PO tercatat di audit trail (activitylog) beserta pelakunya (causer).
-- Larangan memutuskan PO sendiri tidak boleh bergantung hanya pada Policy: Shield `intercept_gate = before` membuat admin lolos semua ability (lihat `brownfield.md`).
+- Larangan memutuskan PO sendiri tidak boleh bergantung hanya pada Policy: admin memegang semua permission, jadi aturan ini ditegakkan di domain dan diuji dengan admin pembuat (lihat `brownfield.md`).
 - Hak akses mengikuti pola Filament Shield (`Action:PurchaseOrder`) plus ability kustom di Policy; role: admin, manager, staff. Resource baru masuk `RoleSeeder` dan `AuthorizationMatrixTest`.
 - Hanya admin yang boleh menyetujui dan menolak.
 - Teks antarmuka Bahasa Indonesia lewat `->label('...')`, konsisten dengan resource lain.
@@ -62,7 +62,7 @@ Pain operasional: manager sering terlambat memesan ulang produk berstatus kritis
 ## Assumptions
 
 - Produk kritis = `Product::withStockStatus('critical')` (`current_stock <= reorder_point`), definisi yang sudah ada.
-- Pembuat dan pengaju PO adalah manager (admin juga, lewat bypass Shield); staff tidak membuat atau mengajukan PO.
+- Pembuat dan pengaju PO adalah manager (admin juga, karena memegang semua permission); staff tidak membuat atau mengajukan PO.
 - Hanya PO draft yang itemnya bisa diubah; draft boleh dihapus manager. Diajukan dan disetujui hanya bisa bertransisi.
 - Supplier PO tidak bisa diganti setelah draft dibuat; tiap produk muncul sekali per PO; jumlah ≥ 1; harga ≥ 0.
 - PO tanpa item tidak bisa diajukan.

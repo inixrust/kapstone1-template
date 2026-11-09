@@ -108,7 +108,7 @@ class PurchaseOrder extends Model
 
     /**
      * Ajukan draft (draft → diajukan). Ditegakkan di domain, bukan hanya Policy,
-     * karena admin melewati semua Policy lewat Shield `intercept_gate = before`.
+     * agar aturan transisi berlaku di semua jalur, termasuk yang tidak lewat Policy.
      *
      * @throws AuthorizationException
      */
@@ -219,8 +219,9 @@ class PurchaseOrder extends Model
     }
 
     /**
-     * Larangan pembuat memutuskan PO sendiri dicek langsung di sini, bukan lewat
-     * Policy, karena admin melewati semua Policy (Shield `intercept_gate = before`).
+     * Larangan pembuat memutuskan PO sendiri dicek langsung di sini, bukan hanya
+     * lewat Policy: admin memegang semua permission, jadi aturan ini harus ditegakkan
+     * di domain agar berlaku di semua jalur.
      *
      * @throws AuthorizationException
      */

@@ -74,7 +74,7 @@ tests/support/
 ```
 
 - **Fixture**: impor `test` dan `expect` dari `../support/fixtures`, bukan dari `@playwright/test`. Fixture baru dibuat di `tests/support/fixtures/` lalu digabung di `index.ts`.
-- **Otorisasi**: pakai `pageAs('staff')` / `pageAs('manager')` untuk membuktikan akses. Seperti di Pest, sesi `admin` melewati semua policy (Shield `intercept_gate = before`), jadi tidak membuktikan apa pun soal pembatasan.
+- **Otorisasi**: pakai `pageAs('staff')` / `pageAs('manager')` untuk membuktikan akses. Seperti di Pest, sesi `admin` memegang semua permission, jadi tidak membuktikan pembatasan permission (admin tidak melewati Policy: Shield `define_via_gate = false`, syarat lain di Policy tetap berlaku).
 - **Data**: test berjalan di database dev (bukan `testing`), jadi setiap data yang dibuat harus lewat fixture yang membersihkannya sendiri. Jangan bergantung pada jumlah baris data demo.
 - **Stok**: jangan mengubah `current_stock` di luar pergerakan stok; test E2E yang menyentuh stok harus membuat `StockMovement` lewat UI.
 

@@ -78,7 +78,9 @@ function userWithRole(string $role): User
 }
 
 /**
- * User super admin (role `admin`) — melewati semua policy via Gate::before.
+ * User super admin (role `admin`) — memegang semua permission, tetapi tidak
+ * melewati Policy (Shield `define_via_gate = false`, tanpa Gate::before):
+ * syarat lain di Policy dan ability kustom tetap berlaku.
  * Dikembalikan tanpa login; pakai `$this->actingAs(...)` di test.
  */
 function adminUser(): User

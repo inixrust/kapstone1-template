@@ -83,7 +83,9 @@ Dibuat lewat `UserSeeder` (idempotent `updateOrCreate` by email), BUKAN
 - **Format permission Shield v4: `Action:Resource`** (mis. `ViewAny:Product`,
   `Delete:Product`, `ForceDelete:Product`).
 - **Super admin = role `admin`** (config `super_admin.name` diubah dari
-  `super_admin` → `admin`, `intercept_gate = before`). `panel_user` dimatikan
+  `super_admin` → `admin`, `intercept_gate = before`; nilai ini tidak berlaku
+  karena `define_via_gate = false` — admin lolos karena memegang semua
+  permission, bukan lewat `Gate::before`). `panel_user` dimatikan
   agar role tepat 3: `staff`, `manager`, `admin`.
 - **Seeding self-contained.** `migrate:fresh` mengosongkan tabel permission,
   jadi permission di-regenerate saat seeding lewat `ShieldSeeder`

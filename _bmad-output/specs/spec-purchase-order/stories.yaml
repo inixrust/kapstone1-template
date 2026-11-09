@@ -9,15 +9,15 @@
   spec_checkpoint: false
   done_checkpoint: false
   invoke_dev_with: >-
-    Baca SPEC.md, state-machines.md, brownfield.md, dan AGENTS.md. Jalankan
-    ui-consistency:finding-patterns sebelum membangun halaman Filament baru.
+    Baca SPEC.md, state-machines.md, brownfield.md, dan AGENTS.md. Ikuti pola
+    resource Filament yang sudah ada saat membangun halaman Filament baru.
     Jangan commit; fasilitator yang meng-commit.
 - id: "2"
   title: Persetujuan PO oleh admin
   description: >-
     CAP-2 di SPEC.md: aksi setujui/tolak untuk PO berstatus diajukan, catatan
     wajib saat menolak, dan larangan pembuat memutuskan PO sendiri yang
-    ditegakkan di domain (bukan hanya Policy, karena admin bypass).
+    ditegakkan di domain (bukan hanya Policy, karena admin memegang semua permission).
   spec_checkpoint: false
   done_checkpoint: false
   invoke_dev_with: >-

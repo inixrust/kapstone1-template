@@ -13,7 +13,7 @@ class EditPurchaseOrder extends EditRecord
     protected static string $resource = PurchaseOrderResource::class;
 
     /**
-     * Admin melewati Policy, jadi halaman edit PO selain draft ditutup di sini juga.
+     * Lapisan kedua di samping Policy `update`: halaman edit PO selain draft ditutup di sini juga.
      */
     protected function authorizeAccess(): void
     {

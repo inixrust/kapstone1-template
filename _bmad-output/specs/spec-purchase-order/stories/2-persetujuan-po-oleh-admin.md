@@ -64,7 +64,7 @@ context:
 
 **Acceptance Criteria:** AC-1 … AC-7 di checklist ATDD hijau; test PO/otorisasi/audit lama tetap hijau.
 
-## UI checklist (ui-consistency:adjusting, referensi aksi `submit` di halaman yang sama)
+## UI checklist (ikuti pola resource Filament yang sudah ada; referensi aksi `submit` di halaman yang sama)
 
 - Aksi header `Action::make()` dengan `->label()` Indonesia, `->icon(Heroicon::Outlined…)`, `->authorize()`, `->visible()`, `->modalSubmitActionLabel()` -- pola aksi `submit`.
 - Warna tema: `success` (Setujui), `danger` (Tolak) -- selaras warna badge status.
@@ -74,7 +74,7 @@ context:
 
 ## Implementation Notes
 
-- Diimplementasikan langsung tanpa subagent (aturan sesi: subagent hanya atas permintaan eksplisit); review step 4 dan verifikasi ui-consistency dijalankan inline oleh agen yang sama, bukan reviewer independen.
+- Diimplementasikan langsung tanpa subagent (aturan sesi: subagent hanya atas permintaan eksplisit); review step 4 dan verifikasi kesesuaian dengan pola resource Filament yang sudah ada dijalankan inline oleh agen yang sama, bukan reviewer independen.
 - Temuan: `config/filament-shield.php` `define_via_gate = false`, jadi tidak ada `Gate::before`; admin lolos karena memegang semua permission (`RoleSeeder`). Ability `approve`/`reject` yang `return false` ikut menolak admin (AC-1/AC-2 gagal), maka Policy memakai `hasRole('admin')` mengikuti preseden `ProductPolicy::viewCost()` + cek status `Submitted`. Larangan pembuat tetap di domain (`PurchaseOrder::ensureCanBeDecidedBy()`). Koreksi dokumen agen (`brownfield.md`/`AGENTS.md`) di-defer.
 - `reject('')` di domain melempar `AuthorizationException` (konsisten dengan `submit()`); `decision_note` kosong saat menyetujui disimpan `null`.
 - Aksi `Setujui`/`Tolak` tersembunyi untuk pembuat PO dan PO non-diajukan; helper privat `decide()` di `ViewPurchaseOrder` berbagi pola notifikasi aksi `submit`.

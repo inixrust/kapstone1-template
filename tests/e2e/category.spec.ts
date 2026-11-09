@@ -11,7 +11,7 @@ test.describe('Kategori', () => {
         const searchResponse = staffPage.waitForResponse(
             (response) => /\/livewire[^/]*\/update/.test(response.url()) && response.request().method() === 'POST',
         );
-        await staffPage.getByPlaceholder('Search').fill(category.name);
+        await staffPage.getByRole('searchbox', { name: 'Search', exact: true }).fill(category.name);
         expect((await searchResponse).ok()).toBe(true);
 
         // Then: hanya kategori tersebut yang tampil

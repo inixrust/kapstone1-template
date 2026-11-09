@@ -41,7 +41,7 @@ Inventory management satu gudang: Laravel 13 + Filament 5 (Livewire, tanpa REST 
 - `adjustment` hanya untuk manager/admin dan ditegakkan di Policy + Observer; jalur baru yang mengubah stok harus membuat `StockMovement` lewat model, bukan query builder, agar Observer tetap berlaku.
 - Harga modal (dan nilai turunannya seperti nilai inventory) harus tersembunyi total untuk staff, bukan `****`: gate setiap field, kolom, widget, atau ekspor baru dengan `can('viewCost', Product::class)`.
 - Resource Filament baru: tambahkan ke daftar resource di `RoleSeeder` dan ke test matriks otorisasi.
-- Test otorisasi memakai `userWithRole('staff')`/`userWithRole('manager')`; `adminUser()` melewati semua policy (Shield `intercept_gate = before`), jadi tidak membuktikan apa pun soal akses.
+- Test otorisasi memakai `userWithRole('staff')`/`userWithRole('manager')`; `adminUser()` memegang semua permission, jadi tidak membuktikan pembatasan permission. Shield tidak memasang `Gate::before` (`define_via_gate = false`; `intercept_gate` tidak berpengaruh): syarat lain di Policy tetap berlaku untuk admin, dan ability kustom harus menyebut admin secara eksplisit.
 - Teks antarmuka berbahasa Indonesia, ditulis langsung lewat `->label('...')` seperti resource lain (tidak memakai berkas `lang/`).
 
 ## Known pitfalls

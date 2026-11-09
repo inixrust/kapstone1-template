@@ -63,7 +63,7 @@ context:
 
 **Acceptance Criteria:** AC-1 … AC-10 di checklist ATDD hijau; test PO/stok/otorisasi/audit lama tetap hijau.
 
-## UI checklist (ui-consistency:adjusting, referensi aksi `submit` di halaman yang sama)
+## UI checklist (ikuti pola resource Filament yang sudah ada; referensi aksi `submit` di halaman yang sama)
 
 - `Action::make('receive')`, `->label('Terima')`, `->icon(Heroicon::OutlinedInboxArrowDown)`, `->color('success')` (warna badge Diterima), `->authorize('receive')`, `->visible()` hanya status Approved.
 - `->requiresConfirmation()`, heading `Terima purchase order?`, deskripsi singkat, `->modalSubmitActionLabel('Terima')`.
@@ -71,7 +71,7 @@ context:
 
 ## Implementation Notes
 
-- Diimplementasikan langsung tanpa subagent (aturan sesi: subagent hanya atas permintaan eksplisit, preseden story 2); review step 4 dan verifikasi ui-consistency dijalankan inline oleh agen yang sama, bukan reviewer independen.
+- Diimplementasikan langsung tanpa subagent (aturan sesi: subagent hanya atas permintaan eksplisit, preseden story 2); review step 4 dan verifikasi kesesuaian dengan pola resource Filament yang sudah ada dijalankan inline oleh agen yang sama, bukan reviewer independen.
 - Migrasi `2026_11_08_061340_add_purchase_order_id_to_stock_movements_table` (FK nullable, restrict) sudah dijalankan di database dev.
 - `StockMovement::isFromPurchaseOrder()` membaca nilai original, dipakai Observer (`updating`/`deleting`) dan `StockMovementPolicy` (`update`/`delete`).
 - `PurchaseOrder::receive()`: cek domain (status, login, Policy `receive`) lalu `DB::transaction` dengan `lockForUpdate` + cek ulang status; `value('status')` Eloquent mengembalikan enum hasil cast, jadi dibandingkan dengan enum.
